@@ -1,9 +1,5 @@
 # Askable Task Contribution Attestation
 
-> Draft for Askable Legal review. Do not submit a task until this document
-> has been completed by every contributor and approved under the Askable
-> participant agreement.
-
 Task: TASK_NAME
 Commit: TASK_CODE_COMMIT
 Legal name: YOUR_LEGAL_NAME

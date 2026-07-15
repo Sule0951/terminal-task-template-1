@@ -1,6 +1,6 @@
 # Contributing a Terminal Task
 
-This repository is source-available under the draft `LICENSE`; it is not an
+This repository is source-available under the `LICENSE`; it is not an
 open-source project. Before creating a task, sign the Askable participant
 agreement and keep your fork private.
 
@@ -52,14 +52,6 @@ included. Do not include anything whose rights are uncertain.
    ./scripts/validate-all.sh
    ```
 
-7. Add Askable as a collaborator on the private repository and provide the
-   immutable submission commit SHA plus `TASK_CODE_COMMIT`.
-
-Askable verifies the submission in an Askable-controlled workflow. Do not place
-Askable API keys or verification secrets in your private fork.
-
-## Legal review
-
-The `LICENSE` and the attestation template are drafts for Askable Legal review.
-They do not replace the participant agreement. Askable Legal must approve the
-final terms before this template is published or used for production submissions.
+7. Commit the calibration result and completed attestations in a second,
+   immutable submission commit. Keep both commits and all required task files in
+   your private repository.
