@@ -1,7 +1,7 @@
 # Terminal Task Template
 
 Source-available template for creating [Harbor](https://www.harborframework.com/) /
-[Terminal-Bench](https://www.tbench.ai/) tasks for Askable Labs. It includes a complete
+[Terminal-Bench](https://www.tbench.ai/) tasks for Askable. It includes a complete
 `hello-world` example, task scaffolding, deterministic oracle validation, and a
 reproducible Claude Opus 4.8 calibration workflow.
 
@@ -16,7 +16,7 @@ Do not use this repository to create tasks for another purpose.
    [uv](https://docs.astral.sh/uv/), and Harbor:
 
    ```bash
-   uv tool install "harbor==0.18.0"
+   uv tool install harbor
    ```
 
 4. Read `CONTRIBUTING.md`, especially the human-authorship and provenance rules.
@@ -31,9 +31,11 @@ Do not use this repository to create tasks for another purpose.
 - Record every third-party dependency, code sample, dataset, binary, and fixture in
   `provenance.json`. Only include material whose license or permission supports
   Askable's intended AI-training use.
+- Add Askable as a collaborator before requesting final verification.
 
 Automated checks enforce the record formats. They cannot prove human authorship,
-complete provenance, or ownership; those are enforced by the participant agreement.
+complete provenance, or ownership; those are enforced by the participant agreement
+and Askable review.
 
 ## Create a task
 
@@ -132,9 +134,19 @@ harbor view ./jobs
 ```
 
 Commit the calibration result and completed attestations in a second, immutable
-submission commit. Keep both commits and all required task files in your private
-repository. This two-commit flow avoids an impossible self-reference: a file inside
+submission commit. Provide both the submission commit SHA and `TASK_CODE_COMMIT`
+to Askable. This two-commit flow avoids an impossible self-reference: a file inside
 a Git commit cannot contain that same commit's SHA.
+
+## Askable verification
+
+Askable runs the trusted workflow template in
+`verification/askable-verify-submission.yml` from an Askable-controlled repository,
+not from your private fork. It checks out the submitted SHA, reruns oracle
+validation and all eight Opus attempts with Askable-held credentials, hashes the
+task content, and emits a signed provenance attestation.
+
+Do not add Askable secrets to a participant-owned repository or workflow.
 
 ## Quality checklist
 

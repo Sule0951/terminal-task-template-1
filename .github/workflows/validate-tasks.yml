@@ -27,7 +27,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install Harbor
-        run: uv tool install "harbor==0.18.0"
+        run: uv tool install harbor
 
       - name: Add Harbor to PATH
         run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
