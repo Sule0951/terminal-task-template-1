@@ -137,6 +137,8 @@ Once your oracle passes, so you know the task is solvable. Calibration now check
 
 ## Local template checks
 
+Requires Python 3.11+ (for `tomllib`); the pinned version is in `.python-version`.
+
 ```bash
 python3 -m unittest discover -s tests -v
 ./scripts/validate-submissions.sh
