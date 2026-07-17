@@ -32,12 +32,19 @@ if [[ ! -f "$TASK_PATH/task.toml" ]]; then
 fi
 
 echo "Validating task: $TASK_PATH"
-harbor trials start -p "$TASK_PATH" -a oracle
+TRIAL_OUTPUT="$(harbor trials start -p "$TASK_PATH" -a oracle 2>&1 | tee /dev/stderr)"
 
-TRIAL_DIR="$(find ./trials -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null | sort | tail -n 1 || true)"
+TRIAL_NAME="$(printf '%s\n' "$TRIAL_OUTPUT" | sed -n 's/^Trial name: //p' | tail -n 1)"
 
-if [[ -z "$TRIAL_DIR" ]]; then
-  echo "Error: no trial output found under ./trials" >&2
+if [[ -z "$TRIAL_NAME" ]]; then
+  echo "Error: could not determine trial name from harbor output" >&2
+  exit 1
+fi
+
+TRIAL_DIR="./trials/$TRIAL_NAME"
+
+if [[ ! -d "$TRIAL_DIR" ]]; then
+  echo "Error: trial output directory not found: $TRIAL_DIR" >&2
   exit 1
 fi
 
@@ -46,9 +53,15 @@ if [[ ! -f "$REWARD_FILE" ]]; then
   REWARD_FILE="$TRIAL_DIR/verifier/reward.json"
 fi
 
+print_failure_hints() {
+  echo "Inspect failure output with:" >&2
+  python3 "$ROOT_DIR/scripts/print-verifier-output.py" "$TRIAL_DIR/verifier" --hints >&2 || true
+  echo "  cat $TRIAL_DIR/agent/oracle.txt" >&2
+}
+
 if [[ ! -f "$REWARD_FILE" ]]; then
   echo "Error: reward file not found in $TRIAL_DIR/verifier/" >&2
-  echo "Inspect with: harbor view ./trials" >&2
+  print_failure_hints
   exit 1
 fi
 
@@ -60,7 +73,7 @@ fi
 
 if [[ "$REWARD" != "1" && "$REWARD" != "1.0" ]]; then
   echo "Error: oracle validation failed (reward=$REWARD, expected 1)" >&2
-  echo "Inspect with: harbor view ./trials" >&2
+  print_failure_hints
   exit 1
 fi
 

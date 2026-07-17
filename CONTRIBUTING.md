@@ -1,14 +1,10 @@
 # Contributing a Terminal Task
 
-This repository is source-available under the `LICENSE`; it is not an
-open-source project. Before creating a task, sign the Askable participant
-agreement and keep your fork private.
+This repository is source-available under the `LICENSE`; it is not an open-source project. Before creating a task, sign the Askable participant agreement and keep your fork private.
 
 ## Human-authorship policy
 
-Task code must be written by a human contributor. You may use AI to brainstorm
-task ideas or validate a finished task. You may not use AI to generate, translate,
-rewrite, or modify:
+Task code must be written by a human contributor. You may use AI to brainstorm task ideas or validate a finished task. You may not use AI to generate, translate, rewrite, or modify:
 
 - task implementation code
 - Docker environments
@@ -17,25 +13,19 @@ rewrite, or modify:
 - task-specific scripts
 - fixtures, datasets, or binaries
 
-Every contributor must complete
-`tasks/<task>/attestations/<github-handle>.md` against the task-code commit. The
-attestation affirms human authorship, authority to contribute the material, and
-assignment of all contribution rights to Askable.
+Every contributor must complete `tasks/<task>/attestations/<github-handle>.md` against the task-code commit. The attestation affirms human authorship, authority to contribute the material, and assignment of all contribution rights to Askable.
 
 ## Third-party material and provenance
 
-Create or update `tasks/<task>/provenance.json` for every third-party dependency,
-code sample, dataset, binary, and fixture. Each item requires:
+Create or update `tasks/<task>/provenance.json` for every third-party dependency, code sample, dataset, binary, and fixture. Each item requires:
 
 - name
 - source URL or origin
 - license
 - version or content hash
-- explanation of why its license or permission permits Askable's intended
-  AI-training use
+- explanation of why its license or permission permits Askable's intended AI-training use
 
-Use an empty `third_party_material` array only when no third-party material is
-included. Do not include anything whose rights are uncertain.
+Use an empty `third_party_material` array only when no third-party material is included. Do not include anything whose rights are uncertain.
 
 ## Submission process
 
@@ -52,5 +42,4 @@ included. Do not include anything whose rights are uncertain.
    ./scripts/validate-all.sh
    ```
 
-7. Keep all task files, calibration results, attestations, and both commits in
-   your private repository.
+7. Keep all task files, calibration results, attestations, and both commits in your private repository.
