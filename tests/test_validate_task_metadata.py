@@ -21,7 +21,7 @@ class ValidateTaskMetadataTests(unittest.TestCase):
         attestation_commit: str = COMMIT,
         template_example: bool = False,
         with_attestation: bool = True,
-        network_mode: str = "none",
+        network_mode: str = "no-network",
         network_justification: str | None = None,
         ai_tools_line: str | None = None,
     ) -> Path:

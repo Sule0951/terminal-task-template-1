@@ -141,7 +141,7 @@ Two equivalent routes:
 - [ ] Every contributor has completed an attestation.
 - [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
 - [ ] Dockerfile installs only agent dependencies; verifier dependencies stay in `tests/test.sh`.
-- [ ] `network_mode` is `"none"`, or `metadata.network_justification` explains why the task cannot run offline. Every dependency is vendored into the image at build time.
+- [ ] `network_mode` is `"no-network"`, or `metadata.network_justification` explains why the task cannot run offline. Runtime (agent and verifier) has no network; dependencies are installed into the image at **build** time, where network is expected.
 - [ ] The environment has `git` initialized at the intended base state, with no history that leaks the solution or any future state.
 - [ ] No secrets are committed and network access is declared explicitly.
 

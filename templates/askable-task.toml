@@ -21,5 +21,5 @@ build_timeout_sec = 600.0
 cpus = 1
 memory_mb = 2048
 storage_mb = 10240
-network_mode = "none"
+network_mode = "no-network"
 os = "linux"

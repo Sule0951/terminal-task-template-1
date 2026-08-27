@@ -66,13 +66,13 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
     network_mode = (
         environment.get("network_mode") if isinstance(environment, dict) else None
     )
-    if network_mode != "none" and not is_nonempty_string(
+    if network_mode != "no-network" and not is_nonempty_string(
         metadata.get("network_justification")
     ):
         errors.append(
-            'environment.network_mode must be "none"; any other value requires '
-            "a non-empty metadata.network_justification explaining why the task "
-            "cannot run offline"
+            'environment.network_mode must be "no-network"; any other value '
+            "requires a non-empty metadata.network_justification explaining why "
+            "the task cannot run offline"
         )
 
     category = metadata.get("category")
