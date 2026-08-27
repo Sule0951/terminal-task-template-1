@@ -46,7 +46,7 @@ The generated task contains the files defined in [CONTEXT.md](CONTEXT.md):
 
 Set exactly one approved `metadata.category` in `task.toml` (see the category list in [CONTEXT.md](CONTEXT.md)), set `metadata.primary_languages` to a non-empty list of the primary implementation languages (`Python`, `Rust`, `TypeScript`, and similar conventional names), and list every AI tool you used in `metadata.ai_tools_used` (e.g. `["claude-code", "cursor"]`; use `[]` if none).
 
-`tasks/hello-world` is a working reference example only. It is deliberately easy and is not eligible for submission.
+`tasks/hello-world-py` and `tasks/hello-world-ts` are working reference examples only. They are deliberately easy and are not eligible for submission.
 
 ## Develop and validate
 

@@ -27,7 +27,7 @@ The distribution applies at both the task level and the dataset level. A single 
 
 ## Design for ~2 passes in 10 — and mind the noise
 
-Ten attempts is a small sample. A task whose *true* pass rate is 50% has roughly a **1-in-6 chance of observing 7+ passes** and being auto-rejected, and a better-than-even chance of landing in the 5–6 band. The safe target is a true pass rate around **0.20–0.25** — the model genuinely solves it about 2 attempts in 10. At that level, auto-rejection risk is under 1% and the 5–6 band stays what it should be: buffer for sampling noise, not something you spend.
+Ten attempts is a small sample. A task whose *true* pass rate is 50% has roughly a **1-in-6 chance of observing 7+ passes** and being auto-rejected, and a roughly 45% chance of landing in the 5–6 band. The safe target is a true pass rate around **0.20–0.25** — the model genuinely solves it about 2 attempts in 10. At that level, auto-rejection risk is under 1% and the 5–6 band stays what it should be: buffer for sampling noise, not something you spend.
 
 Practical reading: if your local agent runs (see `AUTHORING.md` §8) show the agent succeeding half the time, the task is not close — it is structurally at risk.
 

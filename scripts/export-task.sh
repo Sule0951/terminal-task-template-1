@@ -39,6 +39,7 @@ done
 
 require_command python3
 require_command tar
+require_command rsync
 
 CALIBRATION_FILE="$TASK_PATH/calibration/results.json"
 COMMIT="UNCALIBRATED"
