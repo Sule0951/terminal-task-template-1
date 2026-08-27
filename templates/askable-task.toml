@@ -11,15 +11,15 @@ difficulty_explanation = "Explain why this task is challenging and summarize its
 ai_tools_used = []
 
 [verifier]
-timeout_sec = 120.0
+timeout_sec = 600.0
 
 [agent]
-timeout_sec = 300.0
+timeout_sec = 7200.0
 
 [environment]
 build_timeout_sec = 600.0
 cpus = 1
 memory_mb = 2048
 storage_mb = 10240
-network_mode = "none"
+network_mode = "no-network"
 os = "linux"

@@ -66,13 +66,13 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
     network_mode = (
         environment.get("network_mode") if isinstance(environment, dict) else None
     )
-    if network_mode != "none" and not is_nonempty_string(
+    if network_mode != "no-network" and not is_nonempty_string(
         metadata.get("network_justification")
     ):
         errors.append(
-            'environment.network_mode must be "none"; any other value requires '
-            "a non-empty metadata.network_justification explaining why the task "
-            "cannot run offline"
+            'environment.network_mode must be "no-network"; any other value '
+            "requires a non-empty metadata.network_justification explaining why "
+            "the task cannot run offline"
         )
 
     category = metadata.get("category")
@@ -90,6 +90,24 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
         errors.append(
             "metadata.primary_languages must be a non-empty list of language names"
         )
+
+    dockerfile = task_dir / "environment" / "Dockerfile"
+    if dockerfile.is_file():
+        try:
+            dockerfile_text = dockerfile.read_text()
+        except OSError as error:
+            errors.append(f"environment/Dockerfile: {error}")
+            dockerfile_text = ""
+        if (
+            dockerfile_text
+            and "git init" not in dockerfile_text
+            and not is_nonempty_string(metadata.get("git_justification"))
+        ):
+            errors.append(
+                "environment/Dockerfile must install git and create the initial "
+                "baseline commit (see the template snippet), or "
+                "metadata.git_justification must explain why git does not apply"
+            )
 
     ai_tools = metadata.get("ai_tools_used")
     if ai_tools is not None and (
@@ -145,7 +163,18 @@ def validate_attestations(task_dir: Path, commit: str, errors: list[str]) -> Non
             errors.append(f"attestation {attestation_path.name}: {error}")
             continue
 
-        if document_field(document, "Commit") != commit:
+        attested_commit = document_field(document, "Commit")
+        if commit == "UNCALIBRATED":
+            # No calibration record yet (Askable runs the authoritative job).
+            # The attestation must still bind to a real task-code commit.
+            if not attested_commit or not re.fullmatch(
+                r"[0-9a-f]{40}", attested_commit
+            ):
+                errors.append(
+                    f"attestation {attestation_path.name} must bind to a "
+                    "40-character task-code commit SHA"
+                )
+        elif attested_commit != commit:
             errors.append(
                 f"attestation {attestation_path.name} must bind to commit {commit}"
             )

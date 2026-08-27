@@ -43,4 +43,4 @@ Use an empty `third_party_material` array only when no third-party material is i
    ./scripts/validate-all.sh
    ```
 
-7. Keep all task files, calibration results, attestations, and both commits in your private repository, then either add `ASKABLE-REVIEWER-GITHUB-HANDLE` as a read collaborator or send the archive produced by `./scripts/export-task.sh tasks/<task>`.
+7. Keep all task files, attestations, both commits, and any optional pre-check calibration results in your private repository, then either add `@xicovarisco` as a read collaborator or send the archive produced by `./scripts/export-task.sh tasks/<task>`. Submitting without calibration results is normal — Askable runs the authoritative calibration.

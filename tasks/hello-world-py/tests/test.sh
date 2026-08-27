@@ -3,24 +3,16 @@
 VERIFIER_DIR="/logs/verifier"
 
 # --- Setup ---
-# Install verifier-only dependencies. Keep agent image lean; put tooling here.
-# Output goes to setup-stdout.txt so it stays separate from test results.
-{
-  apt-get update
-  apt-get install -y curl
-  curl -LsSf https://astral.sh/uv/0.9.5/install.sh | sh
-  source "$HOME/.local/bin/env"
-} >>"$VERIFIER_DIR/setup-stdout.txt" 2>&1
+# All verifier tooling (python3, pytest) is baked into the environment image
+# at build time. The runtime has no network: do not apt-get / pip / curl here.
+echo "verifier tooling preinstalled in image" >>"$VERIFIER_DIR/setup-stdout.txt"
 
 # --- Run test suite ---
 # Disable errexit so a failing suite still lets us write reward.txt.
 # Suite output goes to suite-stdout.txt (not Harbor's combined test-stdout.txt).
 set +e
 {
-  uvx \
-  --python 3.12 \
-  --with pytest==8.4.1 \
-  pytest /tests/test_outputs.py
+  python3 -m pytest /tests/test_outputs.py
 } >>"$VERIFIER_DIR/suite-stdout.txt" 2>&1
 TEST_EXIT=$?
 set -e
