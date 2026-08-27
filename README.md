@@ -1,6 +1,6 @@
 # Terminal Task Template
 
-Source-available template for creating [Harbor](https://www.harborframework.com/) / [Terminal-Bench](https://www.tbench.ai/) tasks for Askable. It includes a complete `hello-world` example, task scaffolding, deterministic oracle validation, and a reproducible Claude Opus 4.8 calibration workflow.
+Source-available template for creating [Harbor](https://www.harborframework.com/) / [Terminal-Bench](https://www.tbench.ai/) tasks for Askable. It includes a complete `hello-world` example, task scaffolding, deterministic oracle validation, and a reproducible model-calibration workflow whose designated model, attempt count, and eligibility band are set in `calibration-target.json`.
 
 Use is restricted by the repository license and the Askable participant agreement. Do not use this repository to create tasks for another purpose.
 
@@ -94,7 +94,7 @@ Validate task metadata and submission records:
 
 ## Calibrate difficulty
 
-Once your oracle passes, so you know the task is solvable. Calibration now checks it's the *right* difficulty for Claude Opus 4.8 (`terminus-2`) — hard enough to be interesting, but not impossible.
+Once your oracle passes, so you know the task is solvable. Calibration now checks it's the *right* difficulty for the designated calibration model — hard enough to be interesting, but not impossible. The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root; engagements pin their own target file, so never edit it without approval from your engagement lead.
 
 1. Read `[CONTRIBUTING.md](CONTRIBUTING.md)` and fill out `provenance.json` for the task.
 2. Commit the task code and provenance, then capture that commit's SHA:
@@ -103,7 +103,7 @@ Once your oracle passes, so you know the task is solvable. Calibration now check
    git commit -m "Add my new terminal task"
    TASK_CODE_COMMIT="$(git rev-parse HEAD)"  # SHA of the commit just made; attestations bind to it
   ```
-3. Copy `.env.example` to `.env` and add your own `ANTHROPIC_API_KEY`.
+3. Copy `.env.example` to `.env` and add the API key for the designated calibration model's provider.
 4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`,
 5. Run the calibration:
   ```bash
@@ -111,8 +111,7 @@ Once your oracle passes, so you know the task is solvable. Calibration now check
      --commit "$TASK_CODE_COMMIT" \
      --env-file .env
   ```
-   The script always uses `terminus-2`, `anthropic/claude-opus-4-8`, and `-k 8`, and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if Opus 4.8 succeeds 1–4 times out of 8:
-   Zero or five-plus successes are rejected. Inspect agent trajectories with `harbor view ./jobs`.
+   The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band; anything outside the band is rejected. Inspect agent trajectories with `harbor view ./jobs`.
 6. Commit the calibration result and completed attestations in a second, immutable submission commit:
   ```bash
    git add tasks/my-new-task/calibration tasks/my-new-task/attestations
@@ -129,8 +128,10 @@ Once your oracle passes, so you know the task is solvable. Calibration now check
 - [ ] Oracle validation earns reward `1`.
 - [ ] `provenance.json` accounts for every third-party material item.
 - [ ] Every contributor has completed an attestation.
-- [ ] The task earns 1–4 successes from eight Opus 4.8 attempts.
+- [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
 - [ ] Dockerfile installs only agent dependencies; verifier dependencies stay in `tests/test.sh`.
+- [ ] `network_mode` is `"none"`, or `metadata.network_justification` explains why the task cannot run offline. Every dependency is vendored into the image at build time.
+- [ ] The environment has `git` initialized at the intended base state, with no history that leaks the solution or any future state.
 - [ ] No secrets are committed and network access is declared explicitly.
 
 

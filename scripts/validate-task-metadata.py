@@ -54,10 +54,24 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
         errors.append("task.toml is missing")
         return False
 
-    metadata = read_toml(task_toml, errors).get("metadata")
+    document = read_toml(task_toml, errors)
+    metadata = document.get("metadata")
     if not isinstance(metadata, dict):
         errors.append("task.toml must contain a [metadata] section")
         return False
+
+    environment = document.get("environment")
+    network_mode = (
+        environment.get("network_mode") if isinstance(environment, dict) else None
+    )
+    if network_mode != "none" and not is_nonempty_string(
+        metadata.get("network_justification")
+    ):
+        errors.append(
+            'environment.network_mode must be "none"; any other value requires '
+            "a non-empty metadata.network_justification explaining why the task "
+            "cannot run offline"
+        )
 
     category = metadata.get("category")
     if category not in ALLOWED_CATEGORIES:

@@ -12,7 +12,7 @@ require_command() {
 }
 
 usage() {
-  echo "Usage: $0 <task-path> --commit <task-code-commit> [--env-file <path>]" >&2
+  echo "Usage: $0 <task-path> --commit <task-code-commit> [--env-file <path>] [--target <path>]" >&2
   exit 1
 }
 
@@ -22,6 +22,7 @@ shift
 
 COMMIT=""
 ENV_FILE="$ROOT_DIR/.env"
+TARGET_FILE="$ROOT_DIR/calibration-target.json"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --commit)
@@ -30,6 +31,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --env-file)
       ENV_FILE="${2:-}"
+      shift 2
+      ;;
+    --target)
+      TARGET_FILE="${2:-}"
       shift 2
       ;;
     *)
@@ -47,9 +52,17 @@ done
   echo "Error: environment file not found: $ENV_FILE" >&2
   exit 1
 }
+[[ -f "$TARGET_FILE" ]] || {
+  echo "Error: calibration target file not found: $TARGET_FILE" >&2
+  exit 1
+}
 
 require_command harbor
 require_command python3
+
+CAL_AGENT="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["agent"])' "$TARGET_FILE")"
+CAL_MODEL="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["model"])' "$TARGET_FILE")"
+CAL_ATTEMPTS="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["attempt_count"])' "$TARGET_FILE")"
 
 mkdir -p "$JOBS_DIR"
 SNAPSHOT_FILE="$(mktemp)"
@@ -62,18 +75,20 @@ python3 "$ROOT_DIR/scripts/collect-calibration-rewards.py" \
 
 harbor run \
   -p "$TASK_PATH" \
-  -a terminus-2 \
-  -m anthropic/claude-opus-4-8 \
-  -k 8 \
+  -a "$CAL_AGENT" \
+  -m "$CAL_MODEL" \
+  -k "$CAL_ATTEMPTS" \
   --env-file "$ENV_FILE"
 
 python3 "$ROOT_DIR/scripts/collect-calibration-rewards.py" \
   --jobs-dir "$JOBS_DIR" \
   --snapshot "$SNAPSHOT_FILE" \
+  --expected "$CAL_ATTEMPTS" \
   --output "$REWARDS_FILE"
 
 python3 "$ROOT_DIR/scripts/summarize-calibration.py" \
   --task "$(basename "$TASK_PATH")" \
   --commit "$COMMIT" \
   --rewards-file "$REWARDS_FILE" \
+  --target "$TARGET_FILE" \
   --output "$TASK_PATH/calibration/results.json"

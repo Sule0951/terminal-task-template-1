@@ -33,7 +33,7 @@ Use an empty `third_party_material` array only when no third-party material is i
 2. Set an approved category and non-empty primary-language list in `task.toml`.
 3. Commit task code and provenance. Save that SHA as `TASK_CODE_COMMIT`.
 4. Complete all contributor attestations using `TASK_CODE_COMMIT`.
-5. Run the eight-attempt Opus 4.8 calibration and commit its results.
+5. Run the calibration against `calibration-target.json` and commit its results.
 6. Run local checks:
 
    ```bash

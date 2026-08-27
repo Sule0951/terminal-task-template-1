@@ -21,6 +21,8 @@ class ValidateTaskMetadataTests(unittest.TestCase):
         attestation_commit: str = COMMIT,
         template_example: bool = False,
         with_attestation: bool = True,
+        network_mode: str = "none",
+        network_justification: str | None = None,
     ) -> Path:
         task_dir = Path(tempfile.mkdtemp()) / "example-task"
         (task_dir / "attestations").mkdir(parents=True)
@@ -36,6 +38,16 @@ class ValidateTaskMetadataTests(unittest.TestCase):
                     + ", ".join(f'"{language}"' for language in language_values)
                     + "]",
                     f"template_example = {str(template_example).lower()}",
+                ]
+                + (
+                    [f'network_justification = "{network_justification}"']
+                    if network_justification is not None
+                    else []
+                )
+                + [
+                    "",
+                    "[environment]",
+                    f'network_mode = "{network_mode}"',
                     "",
                 ]
             )
@@ -130,6 +142,30 @@ Signature: Jane Doe
             self.make_task(template_example=True, with_attestation=False)
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_rejects_network_access_without_justification(self) -> None:
+        result = self.validate(self.make_task(network_mode="public"))
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("network_mode", result.stderr)
+
+    def test_accepts_network_access_with_justification(self) -> None:
+        result = self.validate(
+            self.make_task(
+                network_mode="public",
+                network_justification="Task teaches the agent to debug a live DNS resolver.",
+            )
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_rejects_a_missing_environment_section(self) -> None:
+        task_dir = self.make_task()
+        task_toml = task_dir / "task.toml"
+        content = task_toml.read_text()
+        content = content.split("[environment]")[0]
+        task_toml.write_text(content)
+        result = self.validate(task_dir)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("network_mode", result.stderr)
 
 
 if __name__ == "__main__":
