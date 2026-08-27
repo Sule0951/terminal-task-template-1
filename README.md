@@ -27,7 +27,7 @@ Use is restricted by the repository license and the Askable participant agreemen
 5. **Validate the oracle and run the local checks** (see below).
 6. **Self-check difficulty** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8).
 7. **Submit via the two-commit flow** (below), then either:
-   - add Askable's reviewer account (`ASKABLE-REVIEWER-GITHUB-HANDLE`) as a read collaborator on your private repository, or
+   - add Askable's reviewer account (`@xicovarisco`) as a read collaborator on your private repository, or
    - run `./scripts/export-task.sh tasks/my-new-task` and send us the archive it produces.
 
 ## Create a task
@@ -92,9 +92,9 @@ Validate task metadata and submission records:
 
 ## Calibrate difficulty
 
-Once your oracle passes, so you know the task is solvable, calibration checks it's the *right* difficulty — hard enough to be interesting, but not impossible. The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `google/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
+**Askable runs the authoritative 10-attempt calibration job. You do not need model API keys to submit.** The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `google/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
 
-The authoritative calibration is run by Askable's calibration lead — you do not need model API access for acceptance. Running your own local pass first is optional but strongly recommended; it catches most band misses before they cost a review cycle.
+Your submission steps are 1, 2 and 4 below. Step 5 — running `calibrate-task.sh` yourself — is an **optional local pre-check**: a handful of local agent runs catches most band misses before they cost a review cycle, but do not let it eat your build budget.
 
 1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and fill out `provenance.json` for the task.
 2. Commit the task code and provenance, then capture that commit's SHA:
@@ -103,9 +103,9 @@ The authoritative calibration is run by Askable's calibration lead — you do no
    git commit -m "Add my new terminal task"
    TASK_CODE_COMMIT="$(git rev-parse HEAD)"  # SHA of the commit just made; attestations bind to it
    ```
-3. If self-calibrating: copy `.env.example` to `.env` and add the API key for the designated model's provider.
+3. Optional, if self-calibrating: copy `.env.example` to `.env` and add the API key for the designated model's provider.
 4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`.
-5. Run the calibration:
+5. Optional local pre-check — run the calibration:
    ```bash
    ./scripts/calibrate-task.sh tasks/my-new-task \
      --commit "$TASK_CODE_COMMIT" \
@@ -123,7 +123,7 @@ The authoritative calibration is run by Askable's calibration lead — you do no
 
 Two equivalent routes:
 
-- **Collaborator access (preferred):** add `ASKABLE-REVIEWER-GITHUB-HANDLE` as a read collaborator on your private repository. We review the tasks and the commit history in place.
+- **Collaborator access (preferred):** add `@xicovarisco` as a read collaborator on your private repository. We review the tasks and the commit history in place.
 - **Export:** package a single task, with a checksummed manifest, into an archive:
   ```bash
   ./scripts/export-task.sh tasks/my-new-task
@@ -140,7 +140,7 @@ Two equivalent routes:
 - [ ] `provenance.json` accounts for every third-party material item.
 - [ ] Every contributor has completed an attestation.
 - [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
-- [ ] Dockerfile installs only agent dependencies; verifier dependencies stay in `tests/test.sh`.
+- [ ] Verifier **code** lives in `tests/`; verifier **tooling** is either baked into the image at build time or vendored next to the tests and installed offline. Network access in `test.sh` is a defect.
 - [ ] `network_mode` is `"no-network"`, or `metadata.network_justification` explains why the task cannot run offline. Runtime (agent and verifier) has no network; dependencies are installed into the image at **build** time, where network is expected.
 - [ ] The environment has `git` initialized at the intended base state, with no history that leaks the solution or any future state.
 - [ ] No secrets are committed and network access is declared explicitly.

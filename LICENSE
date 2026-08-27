@@ -34,8 +34,9 @@ Except as expressly permitted in Section 2, you may not:
 - publish, distribute, sublicense, sell, lease, or otherwise make the Materials
   or Task Contributions available to another person;
 - remove proprietary notices or use Askable's name or marks without permission;
-- use AI to generate or modify task code, environments, verifiers, oracle
-  solutions, scripts, fixtures, datasets, or binaries.
+- submit an AI-generated task instruction, or use AI tools on a Task
+  Contribution without disclosing them and personally verifying every file,
+  as required by CONTRIBUTING.md.
 
 4. Task Contributions
 
