@@ -99,7 +99,9 @@ Signature: Jane Doe
             )
         return task_dir
 
-    def validate(self, task_dir: Path) -> subprocess.CompletedProcess[str]:
+    def validate(
+        self, task_dir: Path, commit: str = COMMIT
+    ) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
             [
                 sys.executable,
@@ -107,7 +109,7 @@ Signature: Jane Doe
                 "--task",
                 str(task_dir),
                 "--commit",
-                COMMIT,
+                commit,
             ],
             capture_output=True,
             text=True,
@@ -192,6 +194,17 @@ Signature: Jane Doe
             )
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_accepts_an_uncalibrated_task_with_a_sha_bound_attestation(self) -> None:
+        result = self.validate(self.make_task(), commit="UNCALIBRATED")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_rejects_an_uncalibrated_task_with_a_malformed_attestation_commit(self) -> None:
+        result = self.validate(
+            self.make_task(attestation_commit="not-a-sha"), commit="UNCALIBRATED"
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("40-character", result.stderr)
 
     def test_rejects_a_missing_environment_section(self) -> None:
         task_dir = self.make_task()

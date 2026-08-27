@@ -25,7 +25,7 @@ Use is restricted by the repository license and the Askable participant agreemen
    ```
 4. **Scaffold a task** (`./scripts/new-task.sh my-new-task`) and build it: environment, instruction, hidden tests, reference solution, provenance. `AUTHORING.md` is the guide; the AI-use rules are in `CONTRIBUTING.md`.
 5. **Validate the oracle and run the local checks** (see below).
-6. **Self-check difficulty** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8).
+6. **Optional: self-check difficulty** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8). Recommended, but don't let it eat your build budget; Askable runs the authoritative calibration either way.
 7. **Submit via the two-commit flow** (below), then either:
    - add Askable's reviewer account (`@xicovarisco`) as a read collaborator on your private repository, or
    - run `./scripts/export-task.sh tasks/my-new-task` and send us the archive it produces.
@@ -112,10 +112,10 @@ Your submission steps are 1, 2 and 4 below. Step 5 — running `calibrate-task.s
      --env-file .env
    ```
    The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band. Inspect agent trajectories with `harbor view ./jobs`.
-6. Commit the calibration result and completed attestations in a second, immutable submission commit:
+6. Commit the completed attestations — plus calibration results, if you ran the optional pre-check — in a second, immutable submission commit:
    ```bash
-   git add tasks/my-new-task/calibration tasks/my-new-task/attestations
-   git commit -m "Add calibration results and attestations for my-new-task"
+   git add tasks/my-new-task/attestations tasks/my-new-task/calibration 2>/dev/null || git add tasks/my-new-task/attestations
+   git commit -m "Add submission records for my-new-task"
    ```
    Keep all required task files and both commits in your private repository. This two-commit flow avoids an impossible self-reference: a file inside a Git commit cannot contain that same commit's SHA.
 
@@ -128,7 +128,7 @@ Two equivalent routes:
   ```bash
   ./scripts/export-task.sh tasks/my-new-task
   ```
-  The archive lands in `./exports/`. Uncalibrated tasks export with a warning — calibration is still required before acceptance.
+  The archive lands in `./exports/`. Submitting without a calibration file is normal — Askable runs the authoritative calibration and adds the results; the export just carries a reminder that acceptance still depends on it.
 
 ## Quality checklist
 

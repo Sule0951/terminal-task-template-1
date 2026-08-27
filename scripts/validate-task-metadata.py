@@ -98,8 +98,10 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
         except OSError as error:
             errors.append(f"environment/Dockerfile: {error}")
             dockerfile_text = ""
-        if dockerfile_text and "git" not in dockerfile_text and not is_nonempty_string(
-            metadata.get("git_justification")
+        if (
+            dockerfile_text
+            and "git init" not in dockerfile_text
+            and not is_nonempty_string(metadata.get("git_justification"))
         ):
             errors.append(
                 "environment/Dockerfile must install git and create the initial "
@@ -161,7 +163,18 @@ def validate_attestations(task_dir: Path, commit: str, errors: list[str]) -> Non
             errors.append(f"attestation {attestation_path.name}: {error}")
             continue
 
-        if document_field(document, "Commit") != commit:
+        attested_commit = document_field(document, "Commit")
+        if commit == "UNCALIBRATED":
+            # No calibration record yet (Askable runs the authoritative job).
+            # The attestation must still bind to a real task-code commit.
+            if not attested_commit or not re.fullmatch(
+                r"[0-9a-f]{40}", attested_commit
+            ):
+                errors.append(
+                    f"attestation {attestation_path.name} must bind to a "
+                    "40-character task-code commit SHA"
+                )
+        elif attested_commit != commit:
             errors.append(
                 f"attestation {attestation_path.name} must bind to commit {commit}"
             )

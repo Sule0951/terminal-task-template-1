@@ -36,12 +36,25 @@ if metadata.get("template_example") is True:
     print("template-example")
     raise SystemExit(0)
 
+results_path = task_dir / "calibration" / "results.json"
+if not results_path.is_file():
+    # Uncalibrated submissions are a first-class path: Askable runs the
+    # authoritative calibration job and adds results.json afterwards.
+    print(
+        f"Warning: {task_dir} has no calibration/results.json — validating as "
+        "an uncalibrated submission (Askable runs the authoritative "
+        "calibration).",
+        file=sys.stderr,
+    )
+    print("UNCALIBRATED")
+    raise SystemExit(0)
+
 try:
-    result = json.loads((task_dir / "calibration" / "results.json").read_text())
+    result = json.loads(results_path.read_text())
     commit = result["commit"]
 except (OSError, KeyError, TypeError, json.JSONDecodeError) as error:
     print(
-        f"Error: {task_dir} requires calibration/results.json with a commit: {error}",
+        f"Error: {task_dir} has an invalid calibration/results.json: {error}",
         file=sys.stderr,
     )
     raise SystemExit(1)
