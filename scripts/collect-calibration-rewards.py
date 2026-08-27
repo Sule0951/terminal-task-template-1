@@ -36,6 +36,7 @@ def main() -> int:
     parser.add_argument("--snapshot-out", type=Path)
     parser.add_argument("--snapshot", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--expected", type=int, default=8)
     args = parser.parse_args()
 
     if bool(args.snapshot_out) == bool(args.snapshot):
@@ -63,9 +64,9 @@ def main() -> int:
         print(f"Error: {error}", file=sys.stderr)
         return 1
 
-    if len(rewards) != 8:
+    if len(rewards) != args.expected:
         print(
-            f"Error: expected 8 new verifier rewards, found {len(rewards)}",
+            f"Error: expected {args.expected} new verifier rewards, found {len(rewards)}",
             file=sys.stderr,
         )
         return 1

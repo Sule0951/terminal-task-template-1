@@ -1,6 +1,7 @@
 # Harbor run artifacts
 jobs/
 trials/
+exports/
 
 # Secrets
 .env

@@ -48,7 +48,7 @@ VERIFIER   /tests added; test.sh runs the suite against /app;
 - **Same verifier**: the agent and the oracle are graded by identical code. Oracle validation (`./scripts/validate-task.sh`) is just "run the verifier against the reference result instead of an agent's." Reward `1` ⇒ the task is solvable and the verifier agrees; if the oracle can't earn `1`, no agent can.
 - **Agent isolation**: `/solution` exists only in the oracle phase and `/tests` only in the verifier phase, so a real agent sees neither.
 
-## Worked example: `hello-world`
+## Worked example: `hello-world-py`
 
 The instruction asks the agent to create `/app/hello.txt` containing `Hello, Terminal Tasks!`.
 
@@ -70,7 +70,7 @@ Note the source is `/solution/hello.txt` (the mounted `solution/` dir) and the d
 **Verifier** — `tests/test.sh` installs its own tooling, then checks `/app`:
 
 ```bash
-bun test /tests/test_outputs.ts   # reads /app/hello.txt, asserts content
+uvx --python 3.12 --with pytest==8.4.1 pytest /tests/test_outputs.py   # reads /app/hello.txt, asserts content
 # writes 1 or 0 to /logs/verifier/reward.txt
 ```
 
@@ -82,7 +82,7 @@ The test reads `/app/hello.txt` — the exact file the agent (or oracle) wrote �
 |---|---|---|
 | `/app/` | empty | `hello.txt` — written by `solve.sh` |
 | `/solution/` | `hello.txt` — the reference file | — |
-| `/tests/` | — | `test.sh`, `test_outputs.ts` |
+| `/tests/` | — | `test.sh`, `test_outputs.py` |
 | `/logs/verifier/` | — | `reward.txt` → `1` |
 
 ## Where dependencies go
@@ -94,4 +94,4 @@ Because the agent image and the verifier share a container but serve different p
 | What the agent needs to solve the task (runtimes, app source, libraries) | `environment/Dockerfile` and `environment/` | Available while the agent works |
 | Verifier-only tooling (bun, pytest, Playwright, browsers) | the setup section of `tests/test.sh` | Keeps the agent image lean and out of the agent's way |
 
-See `tasks/hello-world/tests/test.sh` for the recommended pattern: setup output goes to `setup-stdout.txt`, suite output to `suite-stdout.txt`.
+See `tasks/hello-world-py/tests/test.sh` for the recommended pattern: setup output goes to `setup-stdout.txt`, suite output to `suite-stdout.txt`.

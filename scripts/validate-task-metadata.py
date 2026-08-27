@@ -29,7 +29,9 @@ PROVENANCE_FIELDS = {
     "ai_training_authorization",
 }
 ATTESTATION_CHECKS = (
-    "- [x] I did not use AI to generate, translate, rewrite, or modify task code.",
+    "- [x] I hand-wrote the task instruction, or edited it so heavily that every requirement is my own; it was not pasted from an AI tool.",
+    "- [x] I personally verified every file in this task — environment, tests, and reference solution — and can explain and defend each decision in a live walkthrough.",
+    "- [x] I disclosed every AI tool used on this task in metadata.ai_tools_used in task.toml.",
     "- [x] I own or have authority to contribute all material in my contribution.",
     "- [x] I assign all right, title, and interest in my contribution to Askable.",
 )
@@ -54,10 +56,24 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
         errors.append("task.toml is missing")
         return False
 
-    metadata = read_toml(task_toml, errors).get("metadata")
+    document = read_toml(task_toml, errors)
+    metadata = document.get("metadata")
     if not isinstance(metadata, dict):
         errors.append("task.toml must contain a [metadata] section")
         return False
+
+    environment = document.get("environment")
+    network_mode = (
+        environment.get("network_mode") if isinstance(environment, dict) else None
+    )
+    if network_mode != "none" and not is_nonempty_string(
+        metadata.get("network_justification")
+    ):
+        errors.append(
+            'environment.network_mode must be "none"; any other value requires '
+            "a non-empty metadata.network_justification explaining why the task "
+            "cannot run offline"
+        )
 
     category = metadata.get("category")
     if category not in ALLOWED_CATEGORIES:
@@ -74,6 +90,13 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
         errors.append(
             "metadata.primary_languages must be a non-empty list of language names"
         )
+
+    ai_tools = metadata.get("ai_tools_used")
+    if ai_tools is not None and (
+        not isinstance(ai_tools, list)
+        or not all(is_nonempty_string(tool) for tool in ai_tools)
+    ):
+        errors.append("metadata.ai_tools_used must be a list of non-empty strings")
     return metadata.get("template_example") is True
 
 

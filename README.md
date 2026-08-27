@@ -1,30 +1,32 @@
 # Terminal Task Template
 
-Source-available template for creating [Harbor](https://www.harborframework.com/) / [Terminal-Bench](https://www.tbench.ai/) tasks for Askable. It includes a complete `hello-world` example, task scaffolding, deterministic oracle validation, and a reproducible Claude Opus 4.8 calibration workflow.
+Source-available template for authoring [Harbor](https://www.harborframework.com/) / [Terminal-Bench](https://www.tbench.ai/) evaluation tasks for Askable: self-contained Docker environments in which frontier AI coding agents are evaluated on real engineering problems. It includes working `hello-world` examples, task scaffolding, deterministic oracle validation, an export tool, and a reproducible calibration workflow whose designated model, attempt count, and eligibility band are pinned in `calibration-target.json`.
+
+This work is for senior, AI-native engineers: people who use modern agentic coding tools daily, know where those agents break, and can turn that knowledge into tasks the agents fail for the right reasons.
 
 Use is restricted by the repository license and the Askable participant agreement. Do not use this repository to create tasks for another purpose.
 
-**New here?** Read `[CONTEXT.md](CONTEXT.md)` first — it defines the core concepts (task, environment, verifier, reward, oracle, calibration) that the rest of this guide assumes.
+## Read these first
 
-## Before you start
+1. **`AUTHORING.md`** — what a good task is and how to design one. The core document; read it before writing anything.
+2. **`DIFFICULTY.md`** — the acceptance bar: how difficulty is measured and what gets rejected.
+3. **`CONTRIBUTING.md`** — process, the AI-use policy, provenance, and attestations.
+4. **`CONTEXT.md`** — the vocabulary (task, environment, verifier, oracle, calibration) the other documents assume.
 
-1. Sign the Askable participant agreement.
-2. Fork this repository and keep your task repository private.
-3. Install [Docker](https://docs.docker.com/get-docker/), [uv](https://docs.astral.sh/uv/), and Harbor:
-  ```bash
+## The workflow, end to end
+
+1. **Sign the Askable participant agreement**, then clone this public repository.
+2. **Create your own private GitHub repository** from your clone. All your work lives there, under your account, with real incremental commit history — we review that history as part of acceptance.
+3. **Install the tooling:** [Docker](https://docs.docker.com/get-docker/), [uv](https://docs.astral.sh/uv/), and Harbor:
+   ```bash
    uv tool install harbor
-  ```
-4. Read `CONTRIBUTING.md`, especially the human-authorship and provenance rules.
-
-
-
-## Non-negotiable submission rules
-
-- Task code must be human-written. AI is allowed for brainstorming and validation, but not for generating, translating, rewriting, or modifying task code, environments, verifiers, oracle solutions, scripts, or fixtures.
-- Every contributor must submit a signed, commit-bound attestation assigning their contribution rights to Askable and warranting that they have authority to do so.
-- Record every third-party dependency, code sample, dataset, binary, and fixture in `provenance.json`. Only include material whose license or permission supports Askable's intended AI-training use.
-
-Automated checks enforce the record formats. They cannot prove human authorship, complete provenance, or ownership; those are enforced by the participant agreement.
+   ```
+4. **Scaffold a task** (`./scripts/new-task.sh my-new-task`) and build it: environment, instruction, hidden tests, reference solution, provenance. `AUTHORING.md` is the guide; the AI-use rules are in `CONTRIBUTING.md`.
+5. **Validate the oracle and run the local checks** (see below).
+6. **Self-check difficulty** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8).
+7. **Submit via the two-commit flow** (below), then either:
+   - add Askable's reviewer account (`ASKABLE-REVIEWER-GITHUB-HANDLE`) as a read collaborator on your private repository, or
+   - run `./scripts/export-task.sh tasks/my-new-task` and send us the archive it produces.
 
 ## Create a task
 
@@ -32,9 +34,9 @@ Automated checks enforce the record formats. They cannot prove human authorship,
 ./scripts/new-task.sh my-new-task
 ```
 
-The generated task contains the files defined in `[CONTEXT.md](CONTEXT.md)`:
+The generated task contains the files defined in [CONTEXT.md](CONTEXT.md):
 
-- `instruction.md`
+- `instruction.md` — hand-written; see the AI policy in `CONTRIBUTING.md`
 - `task.toml` — Harbor configuration
 - `environment/Dockerfile`
 - `tests/test.sh` — verifier entry point (writes `/logs/verifier/reward.txt` or `reward.json`)
@@ -42,17 +44,15 @@ The generated task contains the files defined in `[CONTEXT.md](CONTEXT.md)`:
 - `provenance.json`
 - `attestations/YOUR_GITHUB_HANDLE.md`
 
-Set exactly one approved `metadata.category` in `task.toml` (see the category list in `[CONTEXT.md](CONTEXT.md)`), and set `metadata.primary_languages` to a non-empty list of the primary implementation languages (`Python`, `Rust`, `TypeScript`, and similar conventional names).
+Set exactly one approved `metadata.category` in `task.toml` (see the category list in [CONTEXT.md](CONTEXT.md)), set `metadata.primary_languages` to a non-empty list of the primary implementation languages (`Python`, `Rust`, `TypeScript`, and similar conventional names), and list every AI tool you used in `metadata.ai_tools_used` (e.g. `["claude-code", "cursor"]`; use `[]` if none).
 
-`tasks/hello-world` is a working reference example only. It is deliberately easy and is not eligible for submission.
+`tasks/hello-world-py` and `tasks/hello-world-ts` are working reference examples only. They are deliberately easy and are not eligible for submission.
 
 ## Develop and validate
 
-
-
 ### How a task runs
 
-The `solution/` and `tests/` directories don't sit next to the agent — they're isolated and appear only for the oracle and verifier phases. `[docs/execution-model.md](docs/execution-model.md)` explains, with diagrams and a `hello-world` walkthrough, how these directories map into the container, why the agent never sees them, and where each dependency belongs.
+The `solution/` and `tests/` directories don't sit next to the agent — they're isolated and appear only for the oracle and verifier phases. [docs/execution-model.md](docs/execution-model.md) explains, with diagrams and a `hello-world` walkthrough, how these directories map into the container, why the agent never sees them, and where each dependency belongs.
 
 ### Oracle validation
 
@@ -62,7 +62,7 @@ Validate the reference solution:
 ./scripts/validate-task.sh tasks/my-new-task
 ```
 
-This runs the oracle then the verifier (see `[docs/execution-model.md](docs/execution-model.md)`); a reward of `1` means the task is solvable.
+This runs the oracle then the verifier (see [docs/execution-model.md](docs/execution-model.md)); a reward of `1` means the task is solvable.
 
 On failure, the script prints `cat` commands for the relevant trial logs under `./trials/<trial-name>/`:
 
@@ -80,8 +80,6 @@ Explore a task environment interactively:
 harbor tasks start-env -p tasks/my-new-task -e docker -i
 ```
 
-
-
 ### Submission record checks
 
 Validate task metadata and submission records:
@@ -90,50 +88,60 @@ Validate task metadata and submission records:
 ./scripts/validate-submissions.sh
 ```
 
-
-
 ## Calibrate difficulty
 
-Once your oracle passes, so you know the task is solvable. Calibration now checks it's the *right* difficulty for Claude Opus 4.8 (`terminus-2`) — hard enough to be interesting, but not impossible.
+Once your oracle passes, so you know the task is solvable, calibration checks it's the *right* difficulty — hard enough to be interesting, but not impossible. The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `google/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
 
-1. Read `[CONTRIBUTING.md](CONTRIBUTING.md)` and fill out `provenance.json` for the task.
+The authoritative calibration is run by Askable's calibration lead — you do not need model API access for acceptance. Running your own local pass first is optional but strongly recommended; it catches most band misses before they cost a review cycle.
+
+1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and fill out `provenance.json` for the task.
 2. Commit the task code and provenance, then capture that commit's SHA:
-  ```bash
+   ```bash
    git add tasks/my-new-task
    git commit -m "Add my new terminal task"
    TASK_CODE_COMMIT="$(git rev-parse HEAD)"  # SHA of the commit just made; attestations bind to it
-  ```
-3. Copy `.env.example` to `.env` and add your own `ANTHROPIC_API_KEY`.
-4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`,
+   ```
+3. If self-calibrating: copy `.env.example` to `.env` and add the API key for the designated model's provider.
+4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`.
 5. Run the calibration:
-  ```bash
+   ```bash
    ./scripts/calibrate-task.sh tasks/my-new-task \
      --commit "$TASK_CODE_COMMIT" \
      --env-file .env
-  ```
-   The script always uses `terminus-2`, `anthropic/claude-opus-4-8`, and `-k 8`, and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if Opus 4.8 succeeds 1–4 times out of 8:
-   Zero or five-plus successes are rejected. Inspect agent trajectories with `harbor view ./jobs`.
+   ```
+   The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band. Inspect agent trajectories with `harbor view ./jobs`.
 6. Commit the calibration result and completed attestations in a second, immutable submission commit:
-  ```bash
+   ```bash
    git add tasks/my-new-task/calibration tasks/my-new-task/attestations
    git commit -m "Add calibration results and attestations for my-new-task"
-  ```
+   ```
    Keep all required task files and both commits in your private repository. This two-commit flow avoids an impossible self-reference: a file inside a Git commit cannot contain that same commit's SHA.
 
+## Share your work
 
+Two equivalent routes:
+
+- **Collaborator access (preferred):** add `ASKABLE-REVIEWER-GITHUB-HANDLE` as a read collaborator on your private repository. We review the tasks and the commit history in place.
+- **Export:** package a single task, with a checksummed manifest, into an archive:
+  ```bash
+  ./scripts/export-task.sh tasks/my-new-task
+  ```
+  The archive lands in `./exports/`. Uncalibrated tasks export with a warning — calibration is still required before acceptance.
 
 ## Quality checklist
 
-- [ ] The instruction is unambiguous and tests verify only its stated behavior.
+- [ ] The instruction is unambiguous, hand-written per the AI policy, and tests verify only its stated behavior.
 - [ ] `task.toml` has an approved category and non-empty primary-language list.
+- [ ] `metadata.ai_tools_used` lists every AI tool used on the task (or `[]`).
 - [ ] Oracle validation earns reward `1`.
+- [ ] The task carries at least two traps for plausible-but-wrong approaches (`AUTHORING.md` §2).
 - [ ] `provenance.json` accounts for every third-party material item.
 - [ ] Every contributor has completed an attestation.
-- [ ] The task earns 1–4 successes from eight Opus 4.8 attempts.
+- [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
 - [ ] Dockerfile installs only agent dependencies; verifier dependencies stay in `tests/test.sh`.
+- [ ] `network_mode` is `"none"`, or `metadata.network_justification` explains why the task cannot run offline. Every dependency is vendored into the image at build time.
+- [ ] The environment has `git` initialized at the intended base state, with no history that leaks the solution or any future state.
 - [ ] No secrets are committed and network access is declared explicitly.
-
-
 
 ## Local template checks
 
@@ -145,13 +153,12 @@ python3 -m unittest discover -s tests -v
 ./scripts/validate-all.sh
 ```
 
-
-
 ## Reference
 
-- `[CONTEXT.md](CONTEXT.md)` — core concepts and vocabulary
-- `[docs/execution-model.md](docs/execution-model.md)` — how `solution/`, `tests/`, and the agent's work interact with the environment
+- [AUTHORING.md](AUTHORING.md) — how to design a task worth paying for
+- [DIFFICULTY.md](DIFFICULTY.md) — the acceptance bar
+- [CONTEXT.md](CONTEXT.md) — core concepts and vocabulary
+- [docs/execution-model.md](docs/execution-model.md) — how `solution/`, `tests/`, and the agent's work interact with the environment
 - [Harbor task structure](https://www.harborframework.com/docs/tasks)
 - [Harbor task tutorial](https://www.harborframework.com/docs/tasks/task-tutorial)
 - [Terminal-Bench](https://www.tbench.ai/)
-

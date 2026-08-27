@@ -17,7 +17,10 @@ _Avoid_: tbench (except as the domain name).
 The AI system under test. It reads the instruction and works inside the environment; it never sees the verifier or the oracle solution.
 
 **terminus-2**:
-The agent harness (model + scaffolding) used for calibration in this repo, always paired with `anthropic/claude-opus-4-8`. Calibration difficulty is defined relative to this agent, not agents in general.
+The default agent harness (model + scaffolding) used for calibration in this repo, paired with the model named in `calibration-target.json` — currently `google/gemini-3.6-flash` at 10 attempts. Calibration difficulty is defined relative to this designated agent+model, not agents in general.
+
+**Harness**:
+Any Harbor-supported agent used to run attempts against a task. `terminus-2` is the calibration default; authors may also self-check locally with `antigravity` or `gemini-cli` for a Gemini-flavoured pass. The authoritative run always uses whatever `calibration-target.json` specifies.
 
 ## Task anatomy
 
@@ -60,10 +63,10 @@ _Avoid_: reference run, ground truth.
 A single run of the task — either an oracle validation or one run that produces an agent solution — together with its logs and reward.
 
 **Calibration**:
-The eight-trial measurement that fixes a task's difficulty. A task is eligible only if `terminus-2` succeeds 1–4 times out of 8 (`0.125 <= Pass@8 <= 0.5`): hard enough to be interesting, easy enough to be solvable.
+The fixed-attempt measurement that fixes a task's difficulty. The designated agent, model, attempt count, and eligibility band all come from `calibration-target.json`. A task is eligible only if the number of successful attempts lands inside the band: hard enough to be interesting, easy enough to be solvable.
 
-**Pass@8**:
-The fraction of the eight calibration attempts that earned reward `1`.
+**Pass rate**:
+The fraction of calibration attempts that earned reward `1`, out of the target's `attempt_count`.
 
 **Category**:
 The single approved kind a task belongs to (Bug Fix, Generation, Feature Request, Refactor, Translation/Migration, Decompilation/Reverse Engineering, Security Patch/Exploitation), set in `task.toml`.
@@ -72,4 +75,4 @@ The single approved kind a task belongs to (Bug Fix, Generation, Feature Request
 The record (`provenance.json`) of every third-party dependency, sample, dataset, binary, or fixture in a task, with the license and the reason its terms permit Askable's AI-training use. An empty record asserts the task contains none.
 
 **Attestation**:
-A contributor's signed, commit-bound declaration (`attestations/<github-handle>.md`) affirming human authorship, authority to contribute, and assignment of rights to Askable. Bound to the exact task-code commit it covers.
+A contributor's signed, commit-bound declaration (`attestations/<github-handle>.md`) affirming a hand-written instruction, personal verification of every task file, disclosure of AI tools used, authority to contribute, and assignment of rights to Askable. Bound to the exact task-code commit it covers.
