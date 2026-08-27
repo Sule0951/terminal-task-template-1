@@ -23,6 +23,7 @@ class ValidateTaskMetadataTests(unittest.TestCase):
         with_attestation: bool = True,
         network_mode: str = "none",
         network_justification: str | None = None,
+        ai_tools_line: str | None = None,
     ) -> Path:
         task_dir = Path(tempfile.mkdtemp()) / "example-task"
         (task_dir / "attestations").mkdir(parents=True)
@@ -44,6 +45,7 @@ class ValidateTaskMetadataTests(unittest.TestCase):
                     if network_justification is not None
                     else []
                 )
+                + ([ai_tools_line] if ai_tools_line is not None else [])
                 + [
                     "",
                     "[environment]",
@@ -82,7 +84,9 @@ Date: 2026-07-15
 
 ## Declarations
 
-- [x] I did not use AI to generate, translate, rewrite, or modify task code.
+- [x] I hand-wrote the task instruction, or edited it so heavily that every requirement is my own; it was not pasted from an AI tool.
+- [x] I personally verified every file in this task — environment, tests, and reference solution — and can explain and defend each decision in a live walkthrough.
+- [x] I disclosed every AI tool used on this task in metadata.ai_tools_used in task.toml.
 - [x] I own or have authority to contribute all material in my contribution.
 - [x] I assign all right, title, and interest in my contribution to Askable.
 
@@ -156,6 +160,19 @@ Signature: Jane Doe
             )
         )
         self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_accepts_a_disclosed_ai_tool_list(self) -> None:
+        result = self.validate(
+            self.make_task(ai_tools_line='ai_tools_used = ["claude-code"]')
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_rejects_ai_tools_used_that_is_not_a_list(self) -> None:
+        result = self.validate(
+            self.make_task(ai_tools_line='ai_tools_used = "claude-code"')
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("ai_tools_used", result.stderr)
 
     def test_rejects_a_missing_environment_section(self) -> None:
         task_dir = self.make_task()

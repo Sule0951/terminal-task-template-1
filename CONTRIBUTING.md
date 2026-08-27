@@ -1,19 +1,20 @@
 # Contributing a Terminal Task
 
-This repository is source-available under the `LICENSE`; it is not an open-source project. Before creating a task, sign the Askable participant agreement and keep your fork private.
+This repository is source-available under the `LICENSE`; it is not an open-source project. Before creating a task, sign the Askable participant agreement, clone this repository, and do all your work in your own **private** GitHub repository created from it.
 
-## Human-authorship policy
+## AI-use policy
 
-Task code must be written by a human contributor. You may use AI to brainstorm task ideas or validate a finished task. You may not use AI to generate, translate, rewrite, or modify:
+You may use AI coding agents (Claude Code, Codex CLI, Cursor, Antigravity, and similar) to help build the environment, the tests, and the reference solution. We expect you to — fluency with these tools is part of why you were selected.
 
-- task implementation code
-- Docker environments
-- verifier code or tests
-- oracle solutions
-- task-specific scripts
-- fixtures, datasets, or binaries
+Three conditions are absolute:
 
-Every contributor must complete `tasks/<task>/attestations/<github-handle>.md` against the task-code commit. The attestation affirms human authorship, authority to contribute the material, and assignment of all contribution rights to Askable.
+1. **You own every line.** You must personally verify every file in the task and be able to explain and defend each decision in a live 30-minute walkthrough. "The agent wrote it and it passed" is a failing answer. Work you cannot defend is treated as unverified and rejected.
+2. **The instruction is yours.** `instruction.md` must be hand-written, or edited so heavily that every requirement is your own. Pasted AI-generated instructions have a recognisable signature and are rejected on sight (see `AUTHORING.md` §3).
+3. **Disclose your tools.** List every AI tool used on the task in `metadata.ai_tools_used` in `task.toml` (e.g. `["claude-code", "cursor"]`; use `[]` if none). The automated checks validate the field's format.
+
+Your private repository's incremental commit history — including the dead ends — is part of how we verify this. A single giant commit is a red flag regardless of how the work was produced.
+
+Every contributor must complete `tasks/<task>/attestations/<github-handle>.md` against the task-code commit. The attestation affirms the conditions above, authority to contribute the material, and assignment of all contribution rights to Askable.
 
 ## Third-party material and provenance
 
@@ -29,11 +30,11 @@ Use an empty `third_party_material` array only when no third-party material is i
 
 ## Submission process
 
-1. Write the task and confirm the oracle solution earns reward `1`.
-2. Set an approved category and non-empty primary-language list in `task.toml`.
+1. Write the task (see `AUTHORING.md`) and confirm the oracle solution earns reward `1`.
+2. Set an approved category, a non-empty primary-language list, and `ai_tools_used` in `task.toml`.
 3. Commit task code and provenance. Save that SHA as `TASK_CODE_COMMIT`.
 4. Complete all contributor attestations using `TASK_CODE_COMMIT`.
-5. Run the calibration against `calibration-target.json` and commit its results.
+5. Self-check difficulty with local Harbor agent runs (`terminus-2`, `antigravity`, or `gemini-cli` — see `AUTHORING.md` §8); the authoritative calibration against `calibration-target.json` is run by Askable.
 6. Run local checks:
 
    ```bash
@@ -42,4 +43,4 @@ Use an empty `third_party_material` array only when no third-party material is i
    ./scripts/validate-all.sh
    ```
 
-7. Keep all task files, calibration results, attestations, and both commits in your private repository.
+7. Keep all task files, calibration results, attestations, and both commits in your private repository, then either add `ASKABLE-REVIEWER-GITHUB-HANDLE` as a read collaborator or send the archive produced by `./scripts/export-task.sh tasks/<task>`.

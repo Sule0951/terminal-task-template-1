@@ -1,7 +1,7 @@
 {
   "agent": "terminus-2",
-  "model": "anthropic/claude-opus-4-8",
-  "attempt_count": 8,
+  "model": "google/gemini-3.6-flash",
+  "attempt_count": 10,
   "min_success": 1,
   "max_success": 4
 }

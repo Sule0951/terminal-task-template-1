@@ -8,6 +8,7 @@ keywords = ["terminal-task"]
 category = "Bug Fix"
 primary_languages = ["Python"]
 difficulty_explanation = "Explain why this task is challenging and summarize its calibration outcome."
+ai_tools_used = []
 
 [verifier]
 timeout_sec = 120.0

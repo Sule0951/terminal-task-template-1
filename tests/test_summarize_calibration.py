@@ -43,22 +43,22 @@ class SummarizeCalibrationTests(unittest.TestCase):
         )
         return result, output_file
 
-    def test_accepts_four_successes_from_eight_attempts(self) -> None:
-        result, output_file = self.summarize([1, 1, 1, 1, 0, 0, 0, 0])
+    def test_accepts_four_successes_from_ten_attempts(self) -> None:
+        result, output_file = self.summarize([1, 1, 1, 1, 0, 0, 0, 0, 0, 0])
         self.assertEqual(result.returncode, 0, result.stderr)
         record = json.loads(output_file.read_text())
         self.assertEqual(record["success_count"], 4)
-        self.assertEqual(record["pass_rate"], 0.5)
+        self.assertEqual(record["pass_rate"], 0.4)
         self.assertTrue(record["accepted"])
 
     def test_rejects_zero_successes(self) -> None:
-        result, output_file = self.summarize([0] * 8)
+        result, output_file = self.summarize([0] * 10)
         self.assertNotEqual(result.returncode, 0)
         self.assertTrue(output_file.exists(), result.stderr)
         self.assertFalse(json.loads(output_file.read_text())["accepted"])
 
     def test_rejects_five_successes(self) -> None:
-        result, output_file = self.summarize([1] * 5 + [0] * 3)
+        result, output_file = self.summarize([1] * 5 + [0] * 5)
         self.assertNotEqual(result.returncode, 0)
         self.assertTrue(output_file.exists(), result.stderr)
         self.assertFalse(json.loads(output_file.read_text())["accepted"])

@@ -25,17 +25,17 @@ class CalibrateTaskTests(unittest.TestCase):
             """#!/usr/bin/env bash
 set -euo pipefail
 [[ "$*" == *"-a terminus-2"* ]]
-[[ "$*" == *"-m anthropic/claude-opus-4-8"* ]]
-[[ "$*" == *"-k 8"* ]]
-for i in {0..7}; do
+[[ "$*" == *"-m google/gemini-3.6-flash"* ]]
+[[ "$*" == *"-k 10"* ]]
+for i in {0..9}; do
   mkdir -p "$HARBOR_JOBS_DIR/run-$i/verifier"
-  if [[ "$i" -lt 4 ]]; then echo 1; else echo 0; fi > "$HARBOR_JOBS_DIR/run-$i/verifier/reward.txt"
+  if [[ "$i" -lt 2 ]]; then echo 1; else echo 0; fi > "$HARBOR_JOBS_DIR/run-$i/verifier/reward.txt"
 done
 """
         )
         fake_harbor.chmod(0o755)
         env_file = temp_dir / ".env"
-        env_file.write_text("ANTHROPIC_API_KEY=test\n")
+        env_file.write_text("GEMINI_API_KEY=test\n")
         environment = {
             **os.environ,
             "PATH": f"{bin_dir}:{os.environ['PATH']}",
@@ -63,7 +63,8 @@ done
             (task_dir / "calibration" / "results.json").read_text()
         )
         self.assertEqual(record["commit"], COMMIT)
-        self.assertEqual(record["success_count"], 4)
+        self.assertEqual(record["model"], "google/gemini-3.6-flash")
+        self.assertEqual(record["success_count"], 2)
         self.assertTrue(record["accepted"])
 
 

@@ -17,7 +17,10 @@ _Avoid_: tbench (except as the domain name).
 The AI system under test. It reads the instruction and works inside the environment; it never sees the verifier or the oracle solution.
 
 **terminus-2**:
-The agent harness (model + scaffolding) used for calibration in this repo, paired with the model named in `calibration-target.json`. Calibration difficulty is defined relative to this designated agent+model, not agents in general.
+The default agent harness (model + scaffolding) used for calibration in this repo, paired with the model named in `calibration-target.json` — currently `google/gemini-3.6-flash` at 10 attempts. Calibration difficulty is defined relative to this designated agent+model, not agents in general.
+
+**Harness**:
+Any Harbor-supported agent used to run attempts against a task. `terminus-2` is the calibration default; authors may also self-check locally with `antigravity` or `gemini-cli` for a Gemini-flavoured pass. The authoritative run always uses whatever `calibration-target.json` specifies.
 
 ## Task anatomy
 
@@ -72,4 +75,4 @@ The single approved kind a task belongs to (Bug Fix, Generation, Feature Request
 The record (`provenance.json`) of every third-party dependency, sample, dataset, binary, or fixture in a task, with the license and the reason its terms permit Askable's AI-training use. An empty record asserts the task contains none.
 
 **Attestation**:
-A contributor's signed, commit-bound declaration (`attestations/<github-handle>.md`) affirming human authorship, authority to contribute, and assignment of rights to Askable. Bound to the exact task-code commit it covers.
+A contributor's signed, commit-bound declaration (`attestations/<github-handle>.md`) affirming a hand-written instruction, personal verification of every task file, disclosure of AI tools used, authority to contribute, and assignment of rights to Askable. Bound to the exact task-code commit it covers.
