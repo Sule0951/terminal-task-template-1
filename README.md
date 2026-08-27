@@ -2,6 +2,8 @@
 
 Source-available template for authoring [Harbor](https://www.harborframework.com/) / [Terminal-Bench](https://www.tbench.ai/) evaluation tasks for Askable: self-contained Docker environments in which frontier AI coding agents are evaluated on real engineering problems. It includes working `hello-world` examples, task scaffolding, deterministic oracle validation, an export tool, and a reproducible calibration workflow whose designated model, attempt count, and eligibility band are pinned in `calibration-target.json`.
 
+**The goal of every terminal task is to capture something skilled developers can do that AI agents cannot yet do.** A task earns its place by isolating one of those gaps: an agent fails it for real engineering reasons, while an experienced engineer solves it from the instruction alone. Tasks agents already handle are worthless; so are tasks no human could solve.
+
 This work is for senior, AI-native engineers: people who use modern agentic coding tools daily, know where those agents break, and can turn that knowledge into tasks the agents fail for the right reasons.
 
 Use is restricted by the repository license and the Askable participant agreement. Do not use this repository to create tasks for another purpose.

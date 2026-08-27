@@ -8,6 +8,8 @@ Read this once, fully, before building your first task. Most rejected work fails
 
 A prompt is designed to help the agent succeed. A benchmark is designed to find out if it can.
 
+The purpose of every task in this format is to **find and capture the gap between developers and agents**: work a skilled engineer does routinely that today's agents cannot. That gap is the entire value of the deliverable. A task an agent breezes through captures nothing; a task no competent human could solve from the instruction captures noise, not a gap. Your daily experience of where agents break — the refactor they mangle, the investigation they refuse to do, the edge they always miss — is the raw material; a good task is that experience made reproducible and measurable.
+
 Everything in this guide follows from that inversion. You are not writing a ticket for an agent to complete — you are constructing an environment that reveals, honestly and reproducibly, whether a frontier coding agent can do a piece of real engineering. Three properties define a good task:
 
 - **Adversarial** — designed to surface failure, not to enable success. You should be able to name, in advance, the wrong solution a capable agent is likely to produce.
