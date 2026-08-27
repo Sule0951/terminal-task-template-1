@@ -67,10 +67,10 @@ cp /solution/hello.txt /app/hello.txt
 
 Note the source is `/solution/hello.txt` (the mounted `solution/` dir) and the destination is `/app` (the shared `WORKDIR`). An agent, which never sees `/solution`, would instead write `/app/hello.txt` itself.
 
-**Verifier** — `tests/test.sh` installs its own tooling, then checks `/app`:
+**Verifier** — `tests/test.sh` runs tooling already baked into the image at build time (the runtime has no network), then checks `/app`:
 
 ```bash
-uvx --python 3.12 --with pytest==8.4.1 pytest /tests/test_outputs.py   # reads /app/hello.txt, asserts content
+python3 -m pytest /tests/test_outputs.py   # reads /app/hello.txt, asserts content
 # writes 1 or 0 to /logs/verifier/reward.txt
 ```
 
@@ -92,6 +92,6 @@ Because the agent image and the verifier share a container but serve different p
 | Dependency | Goes in | Why |
 |---|---|---|
 | What the agent needs to solve the task (runtimes, app source, libraries) | `environment/Dockerfile` and `environment/` | Available while the agent works |
-| Verifier-only tooling (bun, pytest, Playwright, browsers) | the setup section of `tests/test.sh` | Keeps the agent image lean and out of the agent's way |
+| Verifier-only tooling (bun, pytest, Playwright, browsers) | baked into the image at build time, or vendored next to the tests and installed offline | The runtime has no network; `test.sh` must never download |
 
 See `tasks/hello-world-py/tests/test.sh` for the recommended pattern: setup output goes to `setup-stdout.txt`, suite output to `suite-stdout.txt`.

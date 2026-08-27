@@ -24,6 +24,7 @@ class ValidateTaskMetadataTests(unittest.TestCase):
         network_mode: str = "no-network",
         network_justification: str | None = None,
         ai_tools_line: str | None = None,
+        dockerfile: str | None = None,
     ) -> Path:
         task_dir = Path(tempfile.mkdtemp()) / "example-task"
         (task_dir / "attestations").mkdir(parents=True)
@@ -72,6 +73,9 @@ class ValidateTaskMetadataTests(unittest.TestCase):
                 }
             )
         )
+        if dockerfile is not None:
+            (task_dir / "environment").mkdir()
+            (task_dir / "environment" / "Dockerfile").write_text(dockerfile)
         if with_attestation:
             (task_dir / "attestations" / "jane-doe.md").write_text(
                 f"""# Askable Task Contribution Attestation
@@ -173,6 +177,21 @@ Signature: Jane Doe
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("ai_tools_used", result.stderr)
+
+    def test_rejects_a_dockerfile_without_git(self) -> None:
+        result = self.validate(
+            self.make_task(dockerfile="FROM ubuntu:24.04\nWORKDIR /app\n")
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("git", result.stderr)
+
+    def test_accepts_a_dockerfile_with_a_git_baseline(self) -> None:
+        result = self.validate(
+            self.make_task(
+                dockerfile="FROM ubuntu:24.04\nRUN git init && git commit -m base --allow-empty\n"
+            )
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_rejects_a_missing_environment_section(self) -> None:
         task_dir = self.make_task()

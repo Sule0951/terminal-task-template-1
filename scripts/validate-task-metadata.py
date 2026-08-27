@@ -91,6 +91,22 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
             "metadata.primary_languages must be a non-empty list of language names"
         )
 
+    dockerfile = task_dir / "environment" / "Dockerfile"
+    if dockerfile.is_file():
+        try:
+            dockerfile_text = dockerfile.read_text()
+        except OSError as error:
+            errors.append(f"environment/Dockerfile: {error}")
+            dockerfile_text = ""
+        if dockerfile_text and "git" not in dockerfile_text and not is_nonempty_string(
+            metadata.get("git_justification")
+        ):
+            errors.append(
+                "environment/Dockerfile must install git and create the initial "
+                "baseline commit (see the template snippet), or "
+                "metadata.git_justification must explain why git does not apply"
+            )
+
     ai_tools = metadata.get("ai_tools_used")
     if ai_tools is not None and (
         not isinstance(ai_tools, list)

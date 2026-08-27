@@ -80,7 +80,7 @@ Your reference solution must solve the task the way a strong engineer in the con
 - **Git initialised** at the intended base state — no commit history that leaks the solution or any future state.
 - **Reproducible.** Clean-cache builds succeed; versions pinned.
 - **Canary GUIDs.** Every task file carries the repository's canary comment convention so leaked copies are traceable.
-- **Sane budgets.** Timeouts generous enough that a correct agent isn't killed mid-solve; failure by timeout is only meaningful when the timeout is fair.
+- **Sane budgets.** Timeouts generous enough that a correct agent isn't killed mid-solve; failure by timeout is only meaningful when the timeout is fair. Timeout-as-difficulty is a rejection: if your local agent is still making progress when it dies, raise the timeout — don't call it a fail.
 
 ## 7. Reward hacking
 
