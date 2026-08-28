@@ -25,7 +25,7 @@ Use is restricted by the repository license and the Askable participant agreemen
    ```
 4. **Scaffold a task** (`./scripts/new-task.sh my-new-task`) and build it: environment, instruction, hidden tests, reference solution, provenance. `AUTHORING.md` is the guide; the AI-use rules are in `CONTRIBUTING.md`.
 5. **Validate the oracle and run the local checks** (see below).
-6. **Optional: self-check difficulty** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8). Recommended, but don't let it eat your build budget; Askable runs the authoritative calibration either way.
+6. **Self-check difficulty before you submit** with local Harbor agent runs — `terminus-2` by default, or `antigravity` / `gemini-cli` for a Gemini-flavoured pass — and watch the failure trajectories (`AUTHORING.md` §8). We expect this: a submission that lands outside the difficulty band costs a full review round-trip, and a handful of local runs catches it in an hour. Askable still runs the authoritative calibration — you don't need the designated model's API keys, and any strong agent will expose a too-easy task.
 7. **Submit via the two-commit flow** (below), then either:
    - add Askable's reviewer account (`@xicovarisco`) as a read collaborator on your private repository, or
    - run `./scripts/export-task.sh tasks/my-new-task` and send us the archive it produces.
@@ -94,7 +94,7 @@ Validate task metadata and submission records:
 
 **Askable runs the authoritative 10-attempt calibration job. You do not need model API keys to submit.** The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `google/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
 
-Your submission steps are 1, 2 and 4 below. Step 5 — running `calibrate-task.sh` yourself — is an **optional local pre-check**: a handful of local agent runs catches most band misses before they cost a review cycle, but do not let it eat your build budget.
+Self-checking before you submit is **expected**: a handful of local agent runs (step 5) catches most band misses before they cost you a full review round-trip. You don't need the designated model — pass `--target` with your own agent/model config; a too-easy task shows up on any strong agent. Just don't let calibration tuning eat your build budget.
 
 1. Read [CONTRIBUTING.md](CONTRIBUTING.md) and fill out `provenance.json` for the task.
 2. Commit the task code and provenance, then capture that commit's SHA:
@@ -103,16 +103,16 @@ Your submission steps are 1, 2 and 4 below. Step 5 — running `calibrate-task.s
    git commit -m "Add my new terminal task"
    TASK_CODE_COMMIT="$(git rev-parse HEAD)"  # SHA of the commit just made; attestations bind to it
    ```
-3. Optional, if self-calibrating: copy `.env.example` to `.env` and add the API key for the designated model's provider.
+3. Copy `.env.example` to `.env` and add an API key for whichever agent/model you self-check with.
 4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`.
-5. Optional local pre-check — run the calibration:
+5. Self-check — run the calibration (use `--target <path>` with your own agent/model config if you don't have keys for the designated model):
    ```bash
    ./scripts/calibrate-task.sh tasks/my-new-task \
      --commit "$TASK_CODE_COMMIT" \
      --env-file .env
    ```
    The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band. Inspect agent trajectories with `harbor view ./jobs`.
-6. Commit the completed attestations — plus calibration results, if you ran the optional pre-check — in a second, immutable submission commit:
+6. Commit the completed attestations — plus your self-check calibration results — in a second, immutable submission commit:
    ```bash
    git add tasks/my-new-task/attestations tasks/my-new-task/calibration 2>/dev/null || git add tasks/my-new-task/attestations
    git commit -m "Add submission records for my-new-task"
