@@ -34,7 +34,7 @@ Use an empty `third_party_material` array only when no third-party material is i
 2. Set an approved category, a non-empty primary-language list, and `ai_tools_used` in `task.toml`.
 3. Commit task code and provenance. Save that SHA as `TASK_CODE_COMMIT`.
 4. Complete all contributor attestations using `TASK_CODE_COMMIT`.
-5. Self-check difficulty with local Harbor agent runs (`terminus-2`, `antigravity`, or `gemini-cli` — see `AUTHORING.md` §8); the authoritative calibration against `calibration-target.json` is run by Askable.
+5. Self-check difficulty with local Harbor agent runs before submitting (`terminus-2`, `antigravity`, or `gemini-cli` — see `AUTHORING.md` §8). We expect this — an out-of-band submission costs a full review round-trip. The authoritative calibration against `calibration-target.json` is run by Askable.
 6. Run local checks:
 
    ```bash
@@ -43,4 +43,4 @@ Use an empty `third_party_material` array only when no third-party material is i
    ./scripts/validate-all.sh
    ```
 
-7. Keep all task files, attestations, both commits, and any optional pre-check calibration results in your private repository, then either add `@xicovarisco` as a read collaborator or send the archive produced by `./scripts/export-task.sh tasks/<task>`. Submitting without calibration results is normal — Askable runs the authoritative calibration.
+7. Keep all task files, attestations, both commits, and your self-check calibration results in your private repository, then either add `@xicovarisco` as a read collaborator or send the archive produced by `./scripts/export-task.sh tasks/<task>`. Submitting without calibration results is normal — Askable runs the authoritative calibration.
