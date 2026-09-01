@@ -66,6 +66,13 @@ def main() -> int:
     parser.add_argument("--rewards-file", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--target", type=Path, default=DEFAULT_TARGET)
+    parser.add_argument(
+        "--self-check",
+        action="store_true",
+        help="record an author self-check rather than the authoritative run: "
+        "the record is marked non-authoritative and a band miss is reported "
+        "without failing, because a self-check is information, not a verdict",
+    )
     args = parser.parse_args()
 
     try:
@@ -92,18 +99,27 @@ def main() -> int:
         "success_count": success_count,
         "pass_rate": pass_rate,
         "accepted": accepted,
+        "authoritative": not args.self_check,
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(record, indent=2) + "\n")
 
     if not accepted:
-        print(
-            "Error: calibration requires "
+        band = (
             f"{target['min_success']}–{target['max_success']} successful trials "
-            f"out of {attempt_count}",
-            file=sys.stderr,
+            f"out of {attempt_count}"
         )
+        if args.self_check:
+            # A self-check is a signal to act on before submitting, not a verdict.
+            print(
+                f"Self-check outside the band ({success_count}/{attempt_count}; "
+                f"eligible is {band}). Deepen the problem — do not hide "
+                "requirements (AUTHORING.md §8).",
+                file=sys.stderr,
+            )
+            return 0
+        print(f"Error: calibration requires {band}", file=sys.stderr)
         return 1
 
     print(

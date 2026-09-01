@@ -105,13 +105,14 @@ Self-checking before you submit is **expected**: a handful of local agent runs (
    ```
 3. Copy `.env.example` to `.env` and add an API key for whichever agent/model you self-check with.
 4. Complete each contributor attestation in `tasks/my-new-task/attestations/YOUR_GITHUB_HANDLE.md` using `TASK_CODE_COMMIT`.
-5. Self-check — run the calibration (use `--target <path>` with your own agent/model config if you don't have keys for the designated model):
+5. Self-check — run the calibration with `--self-check` (add `--target <path>` with your own agent/model config if you don't have keys for the designated model):
    ```bash
    ./scripts/calibrate-task.sh tasks/my-new-task \
      --commit "$TASK_CODE_COMMIT" \
-     --env-file .env
+     --env-file .env \
+     --self-check
    ```
-   The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/results.json`. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band. Inspect agent trajectories with `harbor view ./jobs`.
+   The script reads the agent, model, and attempt count from `calibration-target.json` (override with `--target <path>`) and writes `tasks/my-new-task/calibration/self-check.json`, marked `"authoritative": false`. **`calibration/results.json` is reserved for Askable's authoritative run** — keeping them apart matters, because `validate-submissions.sh` binds every attestation to the commit recorded in `results.json`, so a self-check written there at a different commit fails validation for no good reason. A self-check outside the band is reported without failing the command: it is information to act on, not a verdict. The task is eligible only if the number of successful attempts falls inside the target's `min_success`–`max_success` band. Inspect agent trajectories with `harbor view ./jobs`.
 6. Commit the completed attestations — plus your self-check calibration results — in a second, immutable submission commit:
    ```bash
    git add tasks/my-new-task/attestations tasks/my-new-task/calibration 2>/dev/null || git add tasks/my-new-task/attestations
@@ -140,6 +141,7 @@ Two equivalent routes:
 - [ ] `provenance.json` accounts for every third-party material item.
 - [ ] Every contributor has completed an attestation.
 - [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
+- [ ] Any author self-check is committed as `calibration/self-check.json`, not `calibration/results.json`.
 - [ ] Verifier **code** lives in `tests/`; verifier **tooling** is either baked into the image at build time or vendored next to the tests and installed offline. Network access in `test.sh` is a defect.
 - [ ] `network_mode` is `"no-network"`, or `metadata.network_justification` explains why the task cannot run offline. Runtime (agent and verifier) has no network; dependencies are installed into the image at **build** time, where network is expected.
 - [ ] The environment installs `tmux` (and `asciinema`) at build time — the calibration agent cannot start without them on an offline runtime.
