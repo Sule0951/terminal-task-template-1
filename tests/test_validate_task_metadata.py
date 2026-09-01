@@ -25,6 +25,7 @@ class ValidateTaskMetadataTests(unittest.TestCase):
         network_justification: str | None = None,
         ai_tools_line: str | None = None,
         dockerfile: str | None = None,
+        agent_tooling_justification: str | None = None,
     ) -> Path:
         task_dir = Path(tempfile.mkdtemp()) / "example-task"
         (task_dir / "attestations").mkdir(parents=True)
@@ -44,6 +45,14 @@ class ValidateTaskMetadataTests(unittest.TestCase):
                 + (
                     [f'network_justification = "{network_justification}"']
                     if network_justification is not None
+                    else []
+                )
+                + (
+                    [
+                        "agent_tooling_justification = "
+                        f'"{agent_tooling_justification}"'
+                    ]
+                    if agent_tooling_justification is not None
                     else []
                 )
                 + ([ai_tools_line] if ai_tools_line is not None else [])
@@ -182,7 +191,9 @@ Signature: Jane Doe
 
     def test_rejects_a_dockerfile_without_git(self) -> None:
         result = self.validate(
-            self.make_task(dockerfile="FROM ubuntu:24.04\nWORKDIR /app\n")
+            self.make_task(
+                dockerfile="FROM ubuntu:24.04\nRUN apt-get install -y tmux\nWORKDIR /app\n"
+            )
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("git", result.stderr)
@@ -190,7 +201,38 @@ Signature: Jane Doe
     def test_accepts_a_dockerfile_with_a_git_baseline(self) -> None:
         result = self.validate(
             self.make_task(
-                dockerfile="FROM ubuntu:24.04\nRUN git init && git commit -m base --allow-empty\n"
+                dockerfile=(
+                    "FROM ubuntu:24.04\n"
+                    "RUN apt-get install -y tmux asciinema\n"
+                    "RUN git init && git commit -m base --allow-empty\n"
+                )
+            )
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_rejects_a_dockerfile_without_tmux(self) -> None:
+        # terminus-2 cannot start a session without tmux, and an offline runtime
+        # cannot install it, so every calibration attempt would error out before
+        # the agent read the instruction.
+        result = self.validate(
+            self.make_task(
+                dockerfile=(
+                    "FROM ubuntu:24.04\n"
+                    "RUN git init && git commit -m base --allow-empty\n"
+                )
+            )
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("tmux", result.stderr)
+
+    def test_accepts_a_dockerfile_without_tmux_when_justified(self) -> None:
+        result = self.validate(
+            self.make_task(
+                dockerfile=(
+                    "FROM ghcr.io/example/base-with-tmux:1\n"
+                    "RUN git init && git commit -m base --allow-empty\n"
+                ),
+                agent_tooling_justification="The base image already ships tmux.",
             )
         )
         self.assertEqual(result.returncode, 0, result.stderr)

@@ -25,7 +25,7 @@ class CalibrateTaskTests(unittest.TestCase):
             """#!/usr/bin/env bash
 set -euo pipefail
 [[ "$*" == *"-a terminus-2"* ]]
-[[ "$*" == *"-m google/gemini-3.6-flash"* ]]
+[[ "$*" == *"-m gemini/gemini-3.6-flash"* ]]
 [[ "$*" == *"-k 10"* ]]
 for i in {0..9}; do
   mkdir -p "$HARBOR_JOBS_DIR/run-$i/verifier"
@@ -63,7 +63,7 @@ done
             (task_dir / "calibration" / "results.json").read_text()
         )
         self.assertEqual(record["commit"], COMMIT)
-        self.assertEqual(record["model"], "google/gemini-3.6-flash")
+        self.assertEqual(record["model"], "gemini/gemini-3.6-flash")
         self.assertEqual(record["success_count"], 2)
         self.assertTrue(record["accepted"])
 
@@ -136,6 +136,29 @@ done
         self.assertEqual(record["attempt_count"], 10)
         self.assertEqual(record["success_count"], 2)
         self.assertTrue(record["accepted"])
+
+
+class CalibrationTargetTests(unittest.TestCase):
+    # LiteLLM resolves the provider from the prefix. A model string with an
+    # unknown prefix fails with "LLM Provider NOT provided" before any container
+    # starts, so every attempt errors out and no task can ever be calibrated.
+    KNOWN_PREFIXES = {
+        "gemini",
+        "vertex_ai",
+        "openrouter",
+        "anthropic",
+        "openai",
+        "bedrock",
+        "azure",
+        "xai",
+    }
+
+    def test_pinned_model_uses_a_known_provider_route(self) -> None:
+        target = json.loads((ROOT / "calibration-target.json").read_text())
+        model = target["model"]
+        self.assertIn("/", model, f"model {model!r} has no provider prefix")
+        prefix = model.split("/", 1)[0]
+        self.assertIn(prefix, self.KNOWN_PREFIXES, f"unknown provider route {model!r}")
 
 
 if __name__ == "__main__":

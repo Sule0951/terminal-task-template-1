@@ -93,5 +93,6 @@ Because the agent image and the verifier share a container but serve different p
 |---|---|---|
 | What the agent needs to solve the task (runtimes, app source, libraries) | `environment/Dockerfile` and `environment/` | Available while the agent works |
 | Verifier-only tooling (bun, pytest, Playwright, browsers) | baked into the image at build time, or vendored next to the tests and installed offline | The runtime has no network; `test.sh` must never download |
+| Calibration-harness tooling (`tmux`, `asciinema`) | `environment/Dockerfile`, at build time | terminus-2 drives the container through tmux and cannot install it on an offline runtime |
 
 See `tasks/hello-world-py/tests/test.sh` for the recommended pattern: setup output goes to `setup-stdout.txt`, suite output to `suite-stdout.txt`.

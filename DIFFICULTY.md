@@ -4,7 +4,7 @@ This is Askable's acceptance bar for task difficulty. It overrides any looser di
 
 ## How difficulty is measured
 
-Each frozen task is run **10 times** by the designated calibration agent and model — currently `terminus-2` with `google/gemini-3.6-flash`, as pinned in `calibration-target.json`. The number of passing attempts out of 10 is the task's difficulty measurement.
+Each frozen task is run **10 times** by the designated calibration agent and model — currently `terminus-2` with `gemini/gemini-3.6-flash`, as pinned in `calibration-target.json`. The number of passing attempts out of 10 is the task's difficulty measurement.
 
 ## The acceptance distribution
 

@@ -108,6 +108,21 @@ def validate_metadata(task_dir: Path, errors: list[str]) -> bool:
                 "baseline commit (see the template snippet), or "
                 "metadata.git_justification must explain why git does not apply"
             )
+        # terminus-2 drives the container through tmux. The runtime is offline,
+        # so the agent harness cannot install it: a task without tmux fails
+        # every calibration attempt before the agent reads the instruction.
+        if (
+            dockerfile_text
+            and "tmux" not in dockerfile_text
+            and not is_nonempty_string(metadata.get("agent_tooling_justification"))
+        ):
+            errors.append(
+                "environment/Dockerfile must install tmux (the calibration agent "
+                "drives the container through it and cannot install it at runtime, "
+                "so every attempt would fail before the agent reads the "
+                "instruction), or metadata.agent_tooling_justification must "
+                "explain why the base image already provides it"
+            )
 
     ai_tools = metadata.get("ai_tools_used")
     if ai_tools is not None and (

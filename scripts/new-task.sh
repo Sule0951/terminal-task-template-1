@@ -37,6 +37,22 @@ EOF
 sed "s/TASK_NAME/${TASK_NAME}/g" templates/contributor-attestation.md \
   > "$TASK_DIR/attestations/YOUR_GITHUB_HANDLE.md"
 
+# Append the calibration harness prerequisites. terminus-2 drives the container
+# through tmux; the runtime has no network, so it cannot install them itself and
+# every attempt would die before the agent reads the instruction (AUTHORING.md §6).
+if [[ -f "$TASK_DIR/environment/Dockerfile" ]] \
+  && ! grep -q "tmux" "$TASK_DIR/environment/Dockerfile"; then
+  cat >> "$TASK_DIR/environment/Dockerfile" <<'DOCKER'
+
+# Calibration harness: terminus-2 drives the container through tmux and records
+# the session with asciinema. Required — without tmux every calibration attempt
+# fails before the agent reads the instruction.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tmux asciinema \
+    && rm -rf /var/lib/apt/lists/*
+DOCKER
+fi
+
 # Append the git baseline to the scaffolded Dockerfile so every task starts
 # from a committed tree (a GDM-shaped requirement; see AUTHORING.md §6).
 if [[ -f "$TASK_DIR/environment/Dockerfile" ]] \
@@ -65,5 +81,5 @@ echo "  2. Update tasks/${TASK_NAME}/task.toml (name, description, category, lan
 echo "  3. Complete provenance.json and the contributor attestation."
 echo "  4. Edit tasks/${TASK_NAME}/environment/Dockerfile, tests/, and solution/"
 echo "     - network_mode is \"no-network\": install everything at image build; never download in tests/test.sh"
-echo "     - the git baseline block in the Dockerfile is required — do not delete it"
+echo "     - the git baseline and tmux/asciinema blocks in the Dockerfile are required — do not delete them"
 echo "  5. Run ./scripts/validate-task.sh tasks/${TASK_NAME}"

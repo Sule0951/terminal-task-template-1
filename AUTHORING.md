@@ -77,6 +77,7 @@ Your reference solution must solve the task the way a strong engineer in the con
 ## 6. The environment
 
 - **Offline at runtime.** `network_mode = "no-network"`. The agent and the verifier run with no network; dependencies are installed into the image at **build** time, where network is expected. Do not apt-get / pip / npm / cargo / curl in `tests/test.sh` or `solution/solve.sh`. If your stack needs a package manager, vendor at build and prove the runtime works with no network. A runtime-network task needs a written justification (`metadata.network_justification`) and rarely survives review.
+- **Calibration harness baked in.** The calibration agent drives the container through `tmux` and records with `asciinema`. The runtime is offline, so it cannot install them: a task whose image lacks `tmux` fails all ten attempts before the agent reads the instruction. The scaffold installs them; do not remove the block.
 - **Git initialised** at the intended base state — no commit history that leaks the solution or any future state.
 - **Reproducible.** Clean-cache builds succeed; versions pinned.
 - **Canary GUIDs.** Every task file carries the repository's canary comment convention so leaked copies are traceable.

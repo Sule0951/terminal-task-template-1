@@ -92,7 +92,7 @@ Validate task metadata and submission records:
 
 ## Calibrate difficulty
 
-**Askable runs the authoritative 10-attempt calibration job. You do not need model API keys to submit.** The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `google/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
+**Askable runs the authoritative 10-attempt calibration job. You do not need model API keys to submit.** The designated agent, model, attempt count, and eligibility band are defined in `calibration-target.json` at the repo root (currently `terminus-2` with `gemini/gemini-3.6-flash`, 10 attempts, 1–4 successes eligible — see `DIFFICULTY.md` for the full standard). Never edit the target file.
 
 Self-checking before you submit is **expected**: a handful of local agent runs (step 5) catches most band misses before they cost you a full review round-trip. You don't need the designated model — pass `--target` with your own agent/model config; a too-easy task shows up on any strong agent. Just don't let calibration tuning eat your build budget.
 
@@ -142,6 +142,7 @@ Two equivalent routes:
 - [ ] The task's calibration result lands inside the eligibility band in `calibration-target.json`.
 - [ ] Verifier **code** lives in `tests/`; verifier **tooling** is either baked into the image at build time or vendored next to the tests and installed offline. Network access in `test.sh` is a defect.
 - [ ] `network_mode` is `"no-network"`, or `metadata.network_justification` explains why the task cannot run offline. Runtime (agent and verifier) has no network; dependencies are installed into the image at **build** time, where network is expected.
+- [ ] The environment installs `tmux` (and `asciinema`) at build time — the calibration agent cannot start without them on an offline runtime.
 - [ ] The environment has `git` initialized at the intended base state, with no history that leaks the solution or any future state.
 - [ ] No secrets are committed and network access is declared explicitly.
 
