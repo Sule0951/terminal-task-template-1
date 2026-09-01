@@ -99,6 +99,10 @@ manifest = {
 (stage / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
 PY
 
+if [[ -f "$TASK_PATH/calibration/self-check.json" ]]; then
+  echo "Note: includes an author self-check (calibration/self-check.json)."
+fi
+
 tar -czf "$ARCHIVE" -C "$STAGE_DIR" "$TASK_NAME"
 
 echo "Exported $TASK_NAME to $ARCHIVE"

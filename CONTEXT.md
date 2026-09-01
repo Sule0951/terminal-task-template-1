@@ -65,6 +65,9 @@ A single run of the task — either an oracle validation or one run that produce
 **Calibration**:
 The fixed-attempt measurement that fixes a task's difficulty. The designated agent, model, attempt count, and eligibility band all come from `calibration-target.json`. A task is eligible only if the number of successful attempts lands inside the band: hard enough to be interesting, easy enough to be solvable.
 
+**Self-check**:
+An author's own difficulty measurement, recorded in `calibration/self-check.json` and marked `"authoritative": false`. It may use any agent and model (`--target`), so it is evidence about a task, never the measurement that decides acceptance. Only Askable's run against `calibration-target.json` writes `calibration/results.json`.
+
 **Pass rate**:
 The fraction of calibration attempts that earned reward `1`, out of the target's `attempt_count`.
 

@@ -34,7 +34,7 @@ Use an empty `third_party_material` array only when no third-party material is i
 2. Set an approved category, a non-empty primary-language list, and `ai_tools_used` in `task.toml`.
 3. Commit task code and provenance. Save that SHA as `TASK_CODE_COMMIT`.
 4. Complete all contributor attestations using `TASK_CODE_COMMIT`.
-5. Self-check difficulty with local Harbor agent runs before submitting (`terminus-2`, `antigravity`, or `gemini-cli` — see `AUTHORING.md` §8). We expect this — an out-of-band submission costs a full review round-trip. The authoritative calibration against `calibration-target.json` is run by Askable.
+5. Self-check difficulty with local Harbor agent runs before submitting (`terminus-2`, `antigravity`, or `gemini-cli` — see `AUTHORING.md` §8). We expect this — an out-of-band submission costs a full review round-trip. Commit the result as `calibration/self-check.json` (`calibrate-task.sh --self-check`); `calibration/results.json` is reserved for the authoritative run Askable performs against `calibration-target.json`. Record what you actually ran — agent, model, attempt batching, and any environment workaround — so we can reconcile your number with ours when they differ.
 6. Run local checks:
 
    ```bash

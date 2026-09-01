@@ -12,7 +12,7 @@ require_command() {
 }
 
 usage() {
-  echo "Usage: $0 <task-path> --commit <task-code-commit> [--env-file <path>] [--target <path>]" >&2
+  echo "Usage: $0 <task-path> --commit <task-code-commit> [--env-file <path>] [--target <path>] [--self-check]" >&2
   exit 1
 }
 
@@ -23,6 +23,7 @@ shift
 COMMIT=""
 ENV_FILE="$ROOT_DIR/.env"
 TARGET_FILE="$ROOT_DIR/calibration-target.json"
+SELF_CHECK=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --commit)
@@ -36,6 +37,10 @@ while [[ $# -gt 0 ]]; do
     --target)
       TARGET_FILE="${2:-}"
       shift 2
+      ;;
+    --self-check)
+      SELF_CHECK=1
+      shift
       ;;
     *)
       usage
@@ -86,9 +91,21 @@ python3 "$ROOT_DIR/scripts/collect-calibration-rewards.py" \
   --expected "$CAL_ATTEMPTS" \
   --output "$REWARDS_FILE"
 
+# results.json is reserved for Askable's authoritative run, so an author
+# self-check lands beside it under its own name. Both can coexist; only
+# results.json binds attestations in validate-submissions.sh.
+if [[ $SELF_CHECK -eq 1 ]]; then
+  OUTPUT_FILE="$TASK_PATH/calibration/self-check.json"
+  SELF_CHECK_FLAG=(--self-check)
+else
+  OUTPUT_FILE="$TASK_PATH/calibration/results.json"
+  SELF_CHECK_FLAG=()
+fi
+
 python3 "$ROOT_DIR/scripts/summarize-calibration.py" \
   --task "$(basename "$TASK_PATH")" \
   --commit "$COMMIT" \
   --rewards-file "$REWARDS_FILE" \
   --target "$TARGET_FILE" \
-  --output "$TASK_PATH/calibration/results.json"
+  "${SELF_CHECK_FLAG[@]+"${SELF_CHECK_FLAG[@]}"}" \
+  --output "$OUTPUT_FILE"

@@ -98,5 +98,47 @@ class SummarizeCalibrationTests(unittest.TestCase):
         self.assertFalse(json.loads(output_file.read_text())["accepted"])
 
 
+class SelfCheckRecordTests(unittest.TestCase):
+    """A self-check is evidence about a task, never the verdict on one."""
+
+    def _run(self, rewards, self_check):
+        tmp = Path(tempfile.mkdtemp())
+        (tmp / "rewards.json").write_text(json.dumps({"rewards": rewards}))
+        out = tmp / "out.json"
+        cmd = [
+            sys.executable, str(SUMMARIZER),
+            "--task", "example-task", "--commit", "c" * 40,
+            "--rewards-file", str(tmp / "rewards.json"),
+            "--output", str(out),
+        ]
+        if self_check:
+            cmd.append("--self-check")
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        record = json.loads(out.read_text()) if out.is_file() else None
+        return result, record
+
+    def test_self_check_is_marked_non_authoritative(self):
+        result, record = self._run([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(record["authoritative"])
+
+    def test_authoritative_run_is_marked_authoritative(self):
+        result, record = self._run([1, 1, 0, 0, 0, 0, 0, 0, 0, 0], False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(record["authoritative"])
+
+    def test_out_of_band_self_check_reports_without_failing(self):
+        # 10/10 is an automatic rejection as a measurement, but as a self-check
+        # it is a signal to deepen the task, so the command must not fail.
+        result, record = self._run([1] * 10, True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(record["accepted"])
+        self.assertIn("Deepen the problem", result.stderr)
+
+    def test_out_of_band_authoritative_run_still_fails(self):
+        result, _ = self._run([1] * 10, False)
+        self.assertNotEqual(result.returncode, 0)
+
+
 if __name__ == "__main__":
     unittest.main()
