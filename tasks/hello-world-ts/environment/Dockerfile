@@ -16,6 +16,14 @@ ENV PATH="/root/.bun/bin:${PATH}"
 # /tests (verifier) resolve them by walking up to /node_modules.
 RUN cd / && bun add react react-dom
 
+# Calibration harness: terminus-2 drives the container through tmux and records
+# the session with asciinema. The runtime has no network, so the agent harness
+# cannot install them itself — without tmux every attempt fails before the agent
+# reads the instruction.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tmux asciinema \
+    && rm -rf /var/lib/apt/lists/*
+
 # Git baseline: the agent starts from a committed tree. Keep solution
 # files and any later state out of this history.
 RUN git init \

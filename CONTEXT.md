@@ -17,7 +17,7 @@ _Avoid_: tbench (except as the domain name).
 The AI system under test. It reads the instruction and works inside the environment; it never sees the verifier or the oracle solution.
 
 **terminus-2**:
-The default agent harness (model + scaffolding) used for calibration in this repo, paired with the model named in `calibration-target.json` — currently `google/gemini-3.6-flash` at 10 attempts. Calibration difficulty is defined relative to this designated agent+model, not agents in general.
+The default agent harness (model + scaffolding) used for calibration in this repo. It drives the container through `tmux`, so every task image must install it at build time (`AUTHORING.md` §6). Paired with the model named in `calibration-target.json` — currently `gemini/gemini-3.6-flash` at 10 attempts. Calibration difficulty is defined relative to this designated agent+model, not agents in general.
 
 **Harness**:
 Any Harbor-supported agent used to run attempts against a task. `terminus-2` is the calibration default; authors may also self-check locally with `antigravity` or `gemini-cli` for a Gemini-flavoured pass. The authoritative run always uses whatever `calibration-target.json` specifies.
